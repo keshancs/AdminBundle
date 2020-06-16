@@ -36,7 +36,9 @@
 {% endblock %}
 
 {% block admin_list_thead_column %}
-    <th>{{ column is defined and column ? ('admin.list.label_' ~ column)|trans : '' }}</th>
+    {% set has_column = column is defined and column %}
+
+    <th data-sorted="{{ has_column ? 'true' : 'false' }}">{{ has_column ? ('admin.list.label_' ~ column)|trans : '' }}</th>
 {% endblock %}
 
 {% block content %}
