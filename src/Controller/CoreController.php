@@ -1,8 +1,8 @@
 <?php
 
-namespace App\AdminBundle\Controller;
+namespace AdminBundle\Controller;
 
-use App\AdminBundle\Admin\AdminInterface;
+use AdminBundle\Admin\AdminInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;

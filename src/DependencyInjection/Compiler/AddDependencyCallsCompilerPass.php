@@ -1,10 +1,10 @@
 <?php
 
-namespace App\AdminBundle\DependencyInjection\Compiler;
+namespace AdminBundle\DependencyInjection\Compiler;
 
-use App\AdminBundle\Controller\AdminController;
-use App\AdminBundle\Route\RouteGenerator;
-use App\AdminBundle\Twig\AdminExtension;
+use AdminBundle\Controller\AdminController;
+use AdminBundle\Route\RouteGenerator;
+use AdminBundle\Twig\AdminExtension;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

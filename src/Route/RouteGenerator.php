@@ -1,6 +1,6 @@
 <?php
 
-namespace App\AdminBundle\Route;
+namespace AdminBundle\Route;
 
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;

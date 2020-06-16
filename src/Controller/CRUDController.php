@@ -1,8 +1,8 @@
 <?php
 
-namespace App\AdminBundle\Controller;
+namespace AdminBundle\Controller;
 
-use App\AdminBundle\Admin\AdminInterface;
+use AdminBundle\Admin\AdminInterface;
 use Doctrine\ORM\QueryBuilder;
 use ReflectionClass;
 use Symfony\Component\Form\FormInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Class CRUDController
  *
  * @copyright 2020, htdocs
- * @package   App\AdminBundle\Controller
+ * @package   AdminBundle\Controller
  * @author    George Klavinsh
  *
  * @property AdminInterface $admin

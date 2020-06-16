@@ -5,20 +5,20 @@ parameters:
 services:
     admin.pool:
         public: true
-        class: App\AdminBundle\Admin\Pool
+        class: AdminBundle\Admin\Pool
         arguments:
             - "@service_container"
 
     admin.route_generator:
         public: true
-        class: App\AdminBundle\Route\RouteGenerator
+        class: AdminBundle\Route\RouteGenerator
         arguments:
             - "%admin.route.path_prefix%"
             - "%admin.route.route_prefix%"
 
 #    twig.admin_extension:
 #        public: true
-#        class: App\AdminBundle\Twig\AdminExtension
+#        class: AdminBundle\Twig\AdminExtension
 #        arguments:
 #            - "@router"
 #            - "@admin.route_generator"
@@ -28,6 +28,6 @@ services:
 #
 #    twig.admin_menu_extension:
 #        public: true
-#        class: App\AdminBundle\Twig\AdminMenuExtension
+#        class: AdminBundle\Twig\AdminMenuExtension
 #        tags:
 #            - { name: twig.extension }

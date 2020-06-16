@@ -1,9 +1,9 @@
 <?php
 
-namespace App\AdminBundle\Admin;
+namespace AdminBundle\Admin;
 
-use App\AdminBundle\Controller\AdminController;
-use App\AdminBundle\Route\RouteGenerator;
+use AdminBundle\Controller\AdminController;
+use AdminBundle\Route\RouteGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
 use ReflectionException;

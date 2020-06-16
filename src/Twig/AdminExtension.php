@@ -1,9 +1,9 @@
 <?php
 
-namespace App\AdminBundle\Twig;
+namespace AdminBundle\Twig;
 
-use App\AdminBundle\Admin\Pool;
-use App\AdminBundle\Route\RouteGenerator;
+use AdminBundle\Admin\Pool;
+use AdminBundle\Route\RouteGenerator;
 use Symfony\Bundle\TwigBundle\DependencyInjection\TwigExtension;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Extension\AbstractExtension;

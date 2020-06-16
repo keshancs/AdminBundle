@@ -1,6 +1,6 @@
 <?php
 
-namespace App\AdminBundle\Twig;
+namespace AdminBundle\Twig;
 
 use Twig\Extension\AbstractExtension;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\AdminBundle;
+namespace AdminBundle;
 
-use App\AdminBundle\Admin\AdminInterface;
-use App\AdminBundle\Controller\AdminController;
-use App\AdminBundle\DependencyInjection\Compiler\AddDependencyCallsCompilerPass;
+use AdminBundle\Admin\AdminInterface;
+use AdminBundle\Controller\AdminController;
+use AdminBundle\DependencyInjection\Compiler\AddDependencyCallsCompilerPass;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;

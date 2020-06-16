@@ -1,6 +1,6 @@
 <?php
 
-namespace App\AdminBundle\DependencyInjection;
+namespace AdminBundle\DependencyInjection;
 
 use Exception;
 use Symfony\Component\Config\FileLocator;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\AdminBundle\Admin;
+namespace AdminBundle\Admin;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
