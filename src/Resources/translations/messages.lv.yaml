@@ -1,0 +1,9 @@
+admin:
+    navigation:
+        label_dashboard: Panelis
+
+    list:
+        label_id: ID
+
+    flash:
+        edit_success: Izmaiņas veiksmīgi saglabātas!

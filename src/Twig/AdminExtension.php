@@ -5,6 +5,7 @@ namespace AdminBundle\Twig;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Route\RouteGenerator;
 use Symfony\Bundle\TwigBundle\DependencyInjection\TwigExtension;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -27,18 +28,26 @@ final class AdminExtension extends AbstractExtension
     private $pool;
 
     /**
-     * @param RouterInterface $router
-     * @param RouteGenerator  $routeGenerator
-     * @param Pool            $pool
+     * @var ParameterBagInterface
+     */
+    private $parameterBag;
+
+    /**
+     * @param RouterInterface       $router
+     * @param RouteGenerator        $routeGenerator
+     * @param Pool                  $pool
+     * @param ParameterBagInterface $parameterBag
      */
     public function __construct(
-        RouterInterface $router,
-        RouteGenerator  $routeGenerator,
-        Pool            $pool
+        RouterInterface       $router,
+        RouteGenerator        $routeGenerator,
+        Pool                  $pool,
+        ParameterBagInterface $parameterBag
     ) {
         $this->router         = $router;
         $this->routeGenerator = $routeGenerator;
         $this->pool           = $pool;
+        $this->parameterBag   = $parameterBag;
     }
 
     /**
@@ -47,10 +56,21 @@ final class AdminExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
+            new TwigFunction('parameter', [$this, 'getParameter']),
             new TwigFunction('admin_pool', [$this, 'getAdminPool']),
             new TwigFunction('admin_route', [$this, 'getAdminRoute']),
             new TwigFunction('admin_path', [$this, 'getAdminPath']),
         ];
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getParameter(string $name)
+    {
+        return $this->parameterBag->get($name);
     }
 
     /**

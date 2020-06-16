@@ -4,7 +4,9 @@ namespace AdminBundle\Controller;
 
 use AdminBundle\Admin\AdminInterface;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,7 +66,7 @@ class CRUDController extends CoreController
 
             $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.edit_success'));
 
-            return $this->redirectToRoute($request->get('_route'), ['id' => $object->getId()]);
+            return $this->redirectToAdminRoute('edit', null, $object->getId());
         }
 
         return $this->render('@Admin/CRUD/edit.html.twig', [

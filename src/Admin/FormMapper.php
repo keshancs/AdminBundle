@@ -3,6 +3,7 @@
 namespace AdminBundle\Admin;
 
 use Symfony\Component\Form\FormBuilderInterface;
+use TranslationUtils;
 
 class FormMapper
 {
@@ -29,35 +30,14 @@ class FormMapper
     public function add(string $name, string $type = null, array $options = [])
     {
         $defaultOptions = [
-            'label' => $this->getLabel($name),
-            'label_attr' => [
-                'class' => 'col-lg-3 col-form-label',
-            ],
-            'row_attr' => [
-                'class' => 'form-group row',
-            ],
-            'attr' => [
-                'class' => 'form-control m-b',
-            ],
+            'label'      => TranslationUtils::getLabel($name),
+            'label_attr' => ['class' => 'col-lg-3 col-form-label'],
+            'row_attr'   => ['class' => 'form-group row'],
+            'attr'       => ['class' => 'form-control m-b'],
         ];
 
         $this->formBuilder->add($name, $type, array_merge($defaultOptions, $options));
 
         return $this;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return string
-     */
-    private function getLabel(string $name)
-    {
-        // TODO: Utils
-        preg_match_all('/([A-Z])?([a-z]+)/', $name, $matches);
-
-        $label = implode('_', array_map('strtolower', $matches[0]));
-
-        return sprintf('admin.form.label_%s', $label);
     }
 }

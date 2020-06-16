@@ -39,4 +39,14 @@ interface AdminInterface
      * @return string|null
      */
     public function generateUrl($name, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH);
+
+    /**
+     * @param string     $name
+     * @param string|int $objectId
+     * @param array      $parameters
+     * @param int        $referenceType
+     *
+     * @return string|null
+     */
+    public function generateObjectUrl($name, $objectId, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH);
 }

@@ -382,11 +382,7 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     }
 
     /**
-     * @param string $name
-     * @param array  $parameters
-     * @param int    $referenceType
-     *
-     * @return string|null
+     * @inheritDoc
      */
     public function generateUrl($name, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
@@ -395,6 +391,16 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
         }
 
         return $this->routeGenerator->generate($this->routes[$name], $parameters, $referenceType);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function generateObjectUrl($name, $objectId, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
+    {
+        $parameters['id'] = $objectId;
+
+        return $this->generateUrl($name, $parameters, $referenceType);
     }
 
     /**

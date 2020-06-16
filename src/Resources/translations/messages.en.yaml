@@ -1,0 +1,9 @@
+admin:
+    navigation:
+        label_dashboard: Dashboard
+
+    list:
+        label_id: ID
+
+    flash:
+        edit_success: Changes saved successfully!

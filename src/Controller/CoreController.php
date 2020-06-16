@@ -3,6 +3,7 @@
 namespace AdminBundle\Controller;
 
 use AdminBundle\Admin\AdminInterface;
+use Exception;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -47,16 +48,36 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @param string $route
-     * @param array  $parameters
-     * @param int    $status
+     * @param Request $request
      *
      * @return RedirectResponse
      */
-    protected function redirectToAdminRoute(string $route, array $parameters = [], int $status = 302)
+    protected function refresh(Request $request)
     {
-        $routeGenerator = $this->get('admin.route_generator');
+        return $this->redirectToRoute($request->get('_route'), $request->get('_route_params'));
+    }
 
-        return $this->redirect($this->generateUrl($routeGenerator->getRouteName($route), $parameters), $status);
+    /**
+     * @param string              $route
+     * @param AdminInterface|null $admin
+     * @param string|int|null     $id
+     * @param array               $parameters
+     * @param int                 $status
+     *
+     * @return RedirectResponse
+     */
+    protected function redirectToAdminRoute(string $route, AdminInterface $admin = null, $id = null, array $parameters = [], int $status = 302)
+    {
+        if (null === $admin) {
+            $admin = $this->admin;
+        }
+
+        if ($id) {
+            $url = $admin->generateObjectUrl($route, $id, $parameters);
+        } else {
+            $url = $admin->generateUrl($route, $parameters);
+        }
+
+        return $this->redirect($url, $status);
     }
 }
