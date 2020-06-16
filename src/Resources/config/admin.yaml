@@ -4,6 +4,19 @@ parameters:
     admin.content.animate:    false
 
 services:
+    AdminBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
+    admin.security.login_form_authenticator:
+        public: true
+        class: AdminBundle\Security\LoginFormAuthenticator
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "@router"
+            - "@security.csrf.token_manager"
+            - "@security.user_password_encoder.generic"
+
     admin.pool:
         public: true
         class: AdminBundle\Admin\Pool

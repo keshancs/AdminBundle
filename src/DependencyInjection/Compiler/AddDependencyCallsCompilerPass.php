@@ -35,10 +35,5 @@ class AddDependencyCallsCompilerPass implements CompilerPassInterface
 
         $pool = $container->getDefinition('admin.pool');
         $pool->addMethodCall('setServices', [$services]);
-
-//        $twig = $container->getDefinition(AdminExtension::class);
-//        $twig->addArgument(new Reference('router'));
-//        $twig->addArgument(new Reference('admin.route_generator'));
-//        $twig->addArgument(new Reference('admin.pool'));
     }
 }

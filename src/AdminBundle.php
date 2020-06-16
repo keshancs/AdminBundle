@@ -4,6 +4,7 @@ namespace AdminBundle;
 
 use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Controller\AdminController;
+use AdminBundle\Controller\SecurityController;
 use AdminBundle\DependencyInjection\Compiler\AddDependencyCallsCompilerPass;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -60,7 +61,7 @@ class AdminBundle extends Bundle
                 $routeName,
                 new Route(
                     $routeGenerator->buildPath([$route]),
-                    ['_controller' => AdminController::class . '::' . $route]
+                    ['_controller' => SecurityController::class . '::' . $route]
                 )
             );
         }

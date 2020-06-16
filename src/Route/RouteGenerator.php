@@ -26,7 +26,7 @@ class RouteGenerator implements UrlGeneratorInterface
     private $routes = [
         'CRUD'     => ['create', 'list', 'edit', 'update', 'delete'],
         'id'       => ['edit', 'update', 'delete'],
-        'security' => ['login'],
+        'security' => ['login', 'logout'],
     ];
 
     /**
