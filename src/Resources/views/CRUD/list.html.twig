@@ -6,6 +6,7 @@
     {{ parent() }}
 
     <link rel="stylesheet" href="{{ asset('bundles/admin/css/plugins/footable/footable.core.css') }}" />
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/plugins/iCheck/custom.css') }}" />
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -18,19 +19,20 @@
 {% endblock %}
 
 {% block admin_list_thead %}
-    <thead>
-        {{ block('admin_list_thead_row') }}
-    </thead>
+    {% if result is defined and result|length > 0 %}
+        <thead>
+            {{ block('admin_list_thead_row') }}
+        </thead>
+    {% endif %}
 {% endblock %}
 
 {% block admin_list_thead_row %}
-    {% if result is defined and result|length > 0 %}
-        <tr>
-            {% for column in result|first|keys %}
-                {{ block('admin_list_thead_column') }}
-            {% endfor %}
-        </tr>
-    {% endif %}
+    <tr>
+        {{ block('admin_list_thead_column') }}
+        {% for column in result|first|keys %}
+            {{ block('admin_list_thead_column') }}
+        {% endfor %}
+    </tr>
 {% endblock %}
 
 {% block admin_list_thead_column %}
@@ -44,8 +46,11 @@
             <tbody>
                 {% for index, data in result %}
                     <tr>
+                        <td>
+                            <input type="checkbox" class="i-checks" name="idx[]" value="{{ data[admin.identifier] }}" />
+                        </td>
                         {% for column, value in data %}
-                            {% if column == admin.list.identifier %}
+                            {% if column == admin.identifier %}
                                 <td><a href="{{ admin_path('edit', admin.code, { id: value }) }}">{{ value }}</a></td>
                             {% else %}
                                 <td>{{ value }}</td>
@@ -60,12 +65,18 @@
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}<!-- FooTable -->
+    {{ parent() }}
 
     <script src="{{ asset('bundles/admin/js/plugins/footable/footable.all.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/js/plugins/iCheck/icheck.min.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('.admin-list').footable();
+
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
         });
     </script>
 {% endblock %}

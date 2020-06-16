@@ -28,6 +28,21 @@ class Page
     private $parent;
 
     /**
+     * @var Page|null $translated
+     *
+     * @ORM\ManyToOne(targetEntity="Page")
+     * @ORM\JoinColumn(name="translated_id", referencedColumnName="page_id")
+     */
+    private $translated;
+
+    /**
+     * @var string $locale
+     *
+     * @ORM\Column(name="locale", type="string")
+     */
+    private $locale;
+
+    /**
      * @var bool $isHomePage
      *
      * @ORM\Column(name="is_home_page", type="boolean")
@@ -58,6 +73,46 @@ class Page
     public function setParent($parent)
     {
         $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * @return Page|null
+     */
+    public function getTranslated()
+    {
+        return $this->translated;
+    }
+
+    /**
+     * @param Page|null $translated
+     *
+     * @return Page
+     */
+    public function setTranslated($translated)
+    {
+        $this->translated = $translated;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return Page
+     */
+    public function setLocale(string $locale)
+    {
+        $this->locale = $locale;
 
         return $this;
     }
