@@ -1,0 +1,71 @@
+{% extends '@Admin/layout.html.twig' %}
+
+{% block title %}{{ admin.class }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/plugins/footable/footable.core.css') }}" />
+{% endblock %}
+
+{% block breadcrumbs %}
+    <h2>{{ admin.class }}</h2>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">
+            <strong>List</strong>
+        </li>
+    </ol>
+{% endblock %}
+
+{% block admin_list_thead %}
+    <thead>
+        {{ block('admin_list_thead_row') }}
+    </thead>
+{% endblock %}
+
+{% block admin_list_thead_row %}
+    {% if result is defined and result|length > 0 %}
+        <tr>
+            {% for column in result|first|keys %}
+                {{ block('admin_list_thead_column') }}
+            {% endfor %}
+        </tr>
+    {% endif %}
+{% endblock %}
+
+{% block admin_list_thead_column %}
+    <th>{{ column is defined and column ? ('admin.list.label_' ~ column)|trans : '' }}</th>
+{% endblock %}
+
+{% block content %}
+    <table class="admin-list table table-stripped toggle-arrow-tiny" data-paging="true">
+        {% if result|length > 0 %}
+            {{ block('admin_list_thead') }}
+            <tbody>
+                {% for index, data in result %}
+                    <tr>
+                        {% for column, value in data %}
+                            {% if column == admin.list.identifier %}
+                                <td><a href="{{ admin_path('edit', admin.code, { id: value }) }}">{{ value }}</a></td>
+                            {% else %}
+                                <td>{{ value }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% else %}
+        {% endif %}
+    </table>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}<!-- FooTable -->
+
+    <script src="{{ asset('bundles/admin/js/plugins/footable/footable.all.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.admin-list').footable();
+        });
+    </script>
+{% endblock %}

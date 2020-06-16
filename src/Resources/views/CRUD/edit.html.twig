@@ -1,0 +1,44 @@
+{% set select2 = true %}
+
+{% extends '@Admin/layout.html.twig' %}
+
+{% form_theme form '@Admin/form_fields.html.twig' %}
+
+{% block breadcrumbs %}
+    <h2>{{ admin.class }}</h2>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{{ admin_path('list', app.request.get('_admin')) }}">List</a>
+        </li>
+        <li class="breadcrumb-item active">
+            <strong>Edit</strong>
+        </li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_rest(form) }}
+
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-white btn-sm m-r-sm" type="submit">{{ 'admin.button.label_cancel'|trans }}</button>
+                    <button class="btn btn-primary btn-sm" type="submit">{{ 'admin.button.label_save_changes'|trans }}</button>
+                </div>
+            </div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="{{ asset('bundles/admin/js/plugins/select2/select2.full.min.js') }}"></script>
+    <script>
+        $('.select2').select2({
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: -1
+        });
+    </script>
+{% endblock %}

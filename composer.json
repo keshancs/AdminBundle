@@ -1,0 +1,27 @@
+{
+    "name": "keshancs/admin-bundle",
+    "type": "symfony-bundle",
+    "description": "The missing Symfony all-in-one admin management",
+    "keywords": [
+        "symfony",
+        "bundle",
+        "admin",
+        "inspinia",
+        "bootstrap"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Georgijs Kļaviņš",
+            "email": "georgijs.klavins@gmail.com"
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "AdminBundle\\": "src/"
+        }
+    }
+}
