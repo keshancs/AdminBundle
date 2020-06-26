@@ -1,13 +1,14 @@
 {
     "name": "keshancs/admin-bundle",
     "type": "symfony-bundle",
-    "description": "The missing Symfony all-in-one admin management",
+    "description": "The Symfony CMS bundle",
     "keywords": [
         "symfony",
         "bundle",
         "admin",
-        "inspinia",
-        "bootstrap"
+        "adminLTE",
+        "bootstrap",
+        "CMS"
     ],
     "license": "MIT",
     "authors": [
@@ -26,7 +27,8 @@
         "symfony/security-bundle": "4.4.*",
         "symfony/swiftmailer-bundle": "^3.4",
         "symfony/translation": "4.4.*",
-        "symfony/validator": "4.4.*"
+        "symfony/validator": "4.4.*",
+        "symfony-cmf/routing-bundle": "^2.1"
     },
     "autoload": {
         "psr-4": {
