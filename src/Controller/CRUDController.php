@@ -2,14 +2,13 @@
 
 namespace AdminBundle\Controller;
 
-use AdminBundle\Admin\AdminInterface;
-use Doctrine\ORM\QueryBuilder;
-use Exception;
-use ReflectionClass;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use AdminBundle\Admin\AbstractAdmin;
+use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Intl\Locales;
 
 /**
  * Class CRUDController
@@ -18,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @package   AdminBundle\Controller
  * @author    George Klavinsh
  *
- * @property AdminInterface $admin
+ * @property AbstractAdmin $admin
  */
 class CRUDController extends CoreController
 {
@@ -29,21 +28,36 @@ class CRUDController extends CoreController
      */
     public function list(Request $request)
     {
-        /** @var QueryBuilder $qb */
-        $qb = $this->getDoctrine()->getManager()->createQueryBuilder();
-        $qb
-            ->select('o')
-            ->from($this->admin->getClass(), 'o')
-        ;
-
-        // TODO: select per page
-        // TODO: iterate
-
-        $template = $this->admin->getTemplate('list');
-
-        return $this->render($template, [
+        return $this->render('@Admin/CRUD/list.html.twig', [
             'admin'  => $this->admin,
-            'result' => $qb->getQuery()->getArrayResult(),
+            'result' => $this->admin->getPage()->getResults(),
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return RedirectResponse|Response
+     */
+    public function create(Request $request)
+    {
+        $object = $this->admin->newInstance();
+
+        /** @var FormInterface $form */
+        $form = $this->admin->getForm();
+        $form->setData($object)->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.edit_success'));
+
+            return $this->redirectToAdminRoute('edit', null, $object->getId());
+        }
+
+        return $this->render('@Admin/CRUD/create.html.twig', [
+            'admin' => $this->admin,
+            'form'  => $form->createView(),
         ]);
     }
 
@@ -51,6 +65,7 @@ class CRUDController extends CoreController
      * @param Request $request
      *
      * @return Response
+     * @throws MappingException
      */
     public function edit(Request $request)
     {
@@ -73,5 +88,43 @@ class CRUDController extends CoreController
             'admin' => $this->admin,
             'form'  => $form->createView(),
         ]);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return RedirectResponse
+     * @throws MappingException
+     */
+    public function translate(Request $request)
+    {
+        $id     = $request->get($this->admin->getIdentifier());
+        $object = $this->admin->getObject($id);
+
+        if (!$locale = $request->get('locale', null)) {
+            $this->addFlash('admin_flash_error', $this->admin->trans('admin.flash.translate_error'));
+
+            return $this->redirectToAdminRoute('edit', null, $object->getId());
+        }
+
+        $em          = $this->getDoctrine()->getManager();
+        $translation = $this->admin->getRepository()->findOneBy(['original' => $object->getId(), 'locale' => $locale]);
+
+        if ($translation) {
+            $this->addFlash('admin_flash_info', $this->admin->trans('admin.flash.translate_info'));
+        } else {
+            $translation = clone $object;
+            $translation
+                ->setOriginal($object)
+                ->setLocale($locale)
+            ;
+
+            $em->persist($translation);
+            $em->flush();
+
+            $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.translate_success'));
+        }
+
+        return $this->redirectToAdminRoute('edit', null, $translation->getId());
     }
 }

@@ -1,84 +1,54 @@
-{% extends '@Admin/layout.html.twig' %}
+{% extends '@Admin/CRUD/layout.html.twig' %}
+
+{% set filters = true %}
 
 {% block title %}{{ admin.class }}{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-
-    <link rel="stylesheet" href="{{ asset('bundles/admin/css/plugins/footable/footable.core.css') }}" />
-    <link rel="stylesheet" href="{{ asset('bundles/admin/css/plugins/iCheck/custom.css') }}" />
-{% endblock %}
-
-{% block breadcrumbs %}
-    <h2>{{ admin.class }}</h2>
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active">
-            <strong>List</strong>
-        </li>
-    </ol>
-{% endblock %}
-
-{% block admin_list_thead %}
-    {% if result is defined and result|length > 0 %}
-        <thead>
-            {{ block('admin_list_thead_row') }}
-        </thead>
-    {% endif %}
-{% endblock %}
-
-{% block admin_list_thead_row %}
-    <tr>
-        {{ block('admin_list_thead_column') }}
-        {% for column in result|first|keys %}
-            {{ block('admin_list_thead_column') }}
-        {% endfor %}
-    </tr>
-{% endblock %}
-
-{% block admin_list_thead_column %}
-    {% set has_column = column is defined and column %}
-
-    <th data-sortable="{{ has_column ? 'true' : 'false' }}">{{ has_column ? ('admin.list.label_' ~ column)|trans : '' }}</th>
-{% endblock %}
+{% block header %}<h1>{{ admin.class }}</h1>{% endblock %}
 
 {% block content %}
-    <table class="admin-list table table-stripped toggle-arrow-tiny" data-paging="true">
-        {% if result|length > 0 %}
-            {{ block('admin_list_thead') }}
-            <tbody>
-                {% for index, data in result %}
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="i-checks" name="idx[]" value="{{ data[admin.identifier] }}" />
-                        </td>
-                        {% for column, value in data %}
-                            {% if column == admin.identifier %}
-                                <td><a href="{{ admin_path('edit', admin.code, { id: value }) }}">{{ value }}</a></td>
-                            {% else %}
-                                <td>{{ value }}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        {% else %}
-        {% endif %}
-    </table>
-{% endblock %}
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ admin_path('create', admin.code) }}" class="btn btn-default">
+            <i class="fas fa-plus"></i> Create
+        </a>
+    </div>
 
-{% block javascripts %}
-    {{ parent() }}
-
-    <script src="{{ asset('bundles/admin/js/plugins/footable/footable.all.min.js') }}"></script>
-    <script src="{{ asset('bundles/admin/js/plugins/iCheck/icheck.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('.admin-list').footable();
-
-            $('.i-checks').iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green',
-            });
-        });
-    </script>
+    {% if result|length > 0 %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ admin.class }}</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+                <form action="" method="post">
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                {% for column in admin.page.list %}
+                                    <th>{{ column.label|trans }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, data in result %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="i-checks" name="idx[]" value="{{ data.id }}" />
+                                    </td>
+                                    {% for column in admin.page.list %}
+                                        {{ render_list_element(admin, column, data) }}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="callout callout-info">
+            <h5>Information!</h5>
+            <p>No results found.</p>
+        </div>
+    {% endif %}
 {% endblock %}

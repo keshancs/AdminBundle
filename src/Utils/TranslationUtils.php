@@ -1,5 +1,7 @@
 <?php
 
+namespace AdminBundle\Utils;
+
 final class TranslationUtils
 {
     /**

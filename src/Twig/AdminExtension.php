@@ -2,11 +2,18 @@
 
 namespace AdminBundle\Twig;
 
+use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
-use AdminBundle\Route\RouteGenerator;
-use Symfony\Bundle\TwigBundle\DependencyInjection\TwigExtension;
+use AdminBundle\Admin\SettingManager;
+use AdminBundle\Mapper\ListColumnDescriptor;
+use AdminBundle\Routing\RouteLoader;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Routing\RouterInterface;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -18,9 +25,9 @@ final class AdminExtension extends AbstractExtension
     private $router;
 
     /**
-     * @var RouteGenerator
+     * @var RouteLoader
      */
-    private $routeGenerator;
+    private $routeLoader;
 
     /**
      * @var Pool
@@ -33,21 +40,45 @@ final class AdminExtension extends AbstractExtension
     private $parameterBag;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @var PropertyAccessor
+     */
+    private $propertyAccessor;
+
+    /**
+     * @var SettingManager
+     */
+    private $settingManager;
+
+    /**
      * @param RouterInterface       $router
-     * @param RouteGenerator        $routeGenerator
+     * @param RouteLoader           $routeLoader
      * @param Pool                  $pool
      * @param ParameterBagInterface $parameterBag
+     * @param Environment           $environment
+     * @param PropertyAccessor      $propertyAccessor
+     * @param SettingManager        $settingManager
      */
     public function __construct(
         RouterInterface       $router,
-        RouteGenerator        $routeGenerator,
+        RouteLoader           $routeLoader,
         Pool                  $pool,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        Environment           $environment,
+        PropertyAccessor      $propertyAccessor,
+        SettingManager        $settingManager
     ) {
-        $this->router         = $router;
-        $this->routeGenerator = $routeGenerator;
-        $this->pool           = $pool;
-        $this->parameterBag   = $parameterBag;
+        $this->router           = $router;
+        $this->routeLoader      = $routeLoader;
+        $this->pool             = $pool;
+        $this->parameterBag     = $parameterBag;
+        $this->environment      = $environment;
+        $this->propertyAccessor = $propertyAccessor;
+        $this->settingManager   = $settingManager;
     }
 
     /**
@@ -57,9 +88,13 @@ final class AdminExtension extends AbstractExtension
     {
         return [
             new TwigFunction('parameter', [$this, 'getParameter']),
+            new TwigFunction('get_admin_setting', [$this, 'getAdminSetting']),
             new TwigFunction('admin_pool', [$this, 'getAdminPool']),
             new TwigFunction('admin_route', [$this, 'getAdminRoute']),
             new TwigFunction('admin_path', [$this, 'getAdminPath']),
+            new TwigFunction('render_list_element', [$this, 'renderListElement'], [
+                'is_safe' => ['html'],
+            ]),
         ];
     }
 
@@ -74,6 +109,16 @@ final class AdminExtension extends AbstractExtension
     }
 
     /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getAdminSetting(string $name)
+    {
+        return $this->settingManager->get($name);
+    }
+
+    /**
      * @return Pool
      */
     public function getAdminPool()
@@ -82,20 +127,18 @@ final class AdminExtension extends AbstractExtension
     }
 
     /**
-     * @param string      $path
+     * @param string      $route
      * @param string|null $adminCode
      *
-     * @return string
+     * @return string|null
      */
-    public function getAdminRoute(string $path, $adminCode = null)
+    public function getAdminRoute(string $route, $adminCode = null)
     {
         if ($adminCode) {
-            $route = $this->pool->getAdminByAdminCode($adminCode)->getRoute($path);
-        } else {
-            $route = $this->routeGenerator->getRouteName($path);
+            return $this->pool->getAdminByAdminCode($adminCode)->getRouteName($route);
         }
 
-        return $route;
+        return $this->routeLoader->getRoutePrefix() . '_' . $route;
     }
 
     /**
@@ -103,10 +146,37 @@ final class AdminExtension extends AbstractExtension
      * @param string|null $adminCode
      * @param array       $parameters
      *
-     * @return string
+     * @return string|null
      */
     public function getAdminPath(string $path, $adminCode = null, array $parameters = [])
     {
-        return $this->router->generate($this->getAdminRoute($path, $adminCode), $parameters);
+        if ($adminRoute = $this->getAdminRoute($path, $adminCode)) {
+            return $this->router->generate($adminRoute, $parameters);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param AdminInterface       $admin
+     * @param ListColumnDescriptor $listColumnDescriptor
+     * @param object               $data
+     *
+     * @return string
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function renderListElement(AdminInterface $admin, ListColumnDescriptor $listColumnDescriptor, $data)
+    {
+        $options  = $listColumnDescriptor->getOptions();
+        $template = sprintf('@Admin/CRUD/list_%s.html.twig', $options['widget'] ?? 'default');
+
+        return $this->environment->render($template, [
+            'admin'  => $admin,
+            'column' => $listColumnDescriptor,
+            'object' => $data,
+            'value'  => $this->propertyAccessor->getValue($data, $listColumnDescriptor->getPropertyPath()),
+        ]);
     }
 }

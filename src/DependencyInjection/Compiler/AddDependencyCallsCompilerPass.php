@@ -2,10 +2,7 @@
 
 namespace AdminBundle\DependencyInjection\Compiler;
 
-use AdminBundle\Controller\AdminController;
-use AdminBundle\Route\RouteGenerator;
-use AdminBundle\Twig\AdminExtension;
-use ReflectionClass;
+use AdminBundle\Admin\AbstractAdmin;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -21,16 +18,28 @@ class AddDependencyCallsCompilerPass implements CompilerPassInterface
 
         foreach ($container->findTaggedServiceIds('admin') as $id => $data) {
             $admin = $container->getDefinition($id);
+
+            if (!in_array(AbstractAdmin::class, class_parents($admin->getClass()))) {
+                throw new \RuntimeException(
+                    sprintf('Admin class `%s` must extend `%s` class', $admin->getClass(), AbstractAdmin::class)
+                );
+            }
+
             $admin->setMethodCalls([
                 ['setPool', [new Reference('admin.pool')]],
                 ['setRouter', [new Reference('router')]],
                 ['setFormFactory', [new Reference('form.factory')]],
                 ['setEntityManager', [new Reference('doctrine.orm.entity_manager')]],
                 ['setTranslator', [new Reference('translator')]],
-                ['setRouteGenerator', [new Reference('admin.route_generator')]],
+                ['setSettingManager', [new Reference('admin.setting_manager')]],
+                ['setTemplate', ['list', '@Admin/CRUD/list.html.twig']],
+                ['setTemplate', ['create', '@Admin/CRUD/create.html.twig']],
+                ['setTemplate', ['edit', '@Admin/CRUD/edit.html.twig']],
             ]);
 
-            $services[] = $admin->getArgument(0);
+            $code = $admin->getArgument(0);
+
+            $services[$code] = new Reference($id);
         }
 
         $pool = $container->getDefinition('admin.pool');

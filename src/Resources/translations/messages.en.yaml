@@ -1,9 +1,43 @@
 admin:
     navigation:
         label_dashboard: Dashboard
+        label_settings:  Settings
+
+    filter:
+        label_id:    ID
+        label_type:  Type
+        label_value: Value
+
+        button:
+            label_reset: Reset
+            label_filter: Apply filters
 
     list:
         label_id: ID
+
+    form:
+        label_parent:   Parent
+        label_original: Original
+        label_locale:   Locale
+        label_title:    Title
+
+        help:
+            label_original: Record that is being translated
+
+        placeholder:
+            label_select: Please select
+
+        choice:
+            language:
+                label_latvian: Latvian
+
+        tabs:
+            label_general: General
+            label_seo:     SEO
+
+        button:
+            label_cancel: Cancel
+            label_save_changes: Save changes
 
     flash:
         edit_success: Changes saved successfully!

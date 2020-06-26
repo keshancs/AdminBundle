@@ -2,15 +2,8 @@
 
 namespace AdminBundle\Admin;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 class Pool
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
     /**
      * @var array
      */
@@ -22,22 +15,6 @@ class Pool
     private $services = [];
 
     /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
      * @return array
      */
     public function getConfig()
@@ -47,14 +24,10 @@ class Pool
 
     /**
      * @param array $config
-     *
-     * @return Pool
      */
-    public function setConfig($config)
+    public function setConfig(array $config)
     {
         $this->config = $config;
-
-        return $this;
     }
 
     /**
@@ -67,14 +40,10 @@ class Pool
 
     /**
      * @param array $services
-     *
-     * @return Pool
      */
     public function setServices($services)
     {
         $this->services = $services;
-
-        return $this;
     }
 
     /**
@@ -84,6 +53,6 @@ class Pool
      */
     public function getAdminByAdminCode(string $code)
     {
-        return $this->container->get($code);
+        return $this->services[$code] ?? null;
     }
 }

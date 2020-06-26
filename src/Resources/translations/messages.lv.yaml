@@ -1,9 +1,43 @@
 admin:
     navigation:
         label_dashboard: Panelis
+        label_settings:  Iestātījumi
+
+    filter:
+        label_id:    ID
+        label_type:  Type
+        label_value: Value
+
+        button:
+            label_reset: Nomest
+            label_filter: Pielietot filtrus
 
     list:
         label_id: ID
+
+    form:
+        label_parent:   Vecāks
+        label_original: Oriģināls
+        label_locale:   Valoda
+        label_title:    Nosaukums
+
+        help:
+            label_original: Ieraksts kas tiek pārtulkots
+
+        placeholder:
+            label_select: Lūdzu izvēlies
+
+        choice:
+            language:
+                label_latvian: Latviešu
+
+        tabs:
+            label_general: Vispārējs
+            label_seo:     SEO
+
+        button:
+            label_cancel: Atcelt
+            label_save_changes: Saglabāt izmaiņas
 
     flash:
         edit_success: Izmaiņas veiksmīgi saglabātas!

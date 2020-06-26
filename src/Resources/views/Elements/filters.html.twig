@@ -1,0 +1,31 @@
+{% if filters|default(false) and admin.page.hasResults %}
+    {% set has_filters = admin.page.hasFilters %}
+
+    <div id="accordion">
+        <div class="card card-light">
+            <a class="card-header{% if not has_filters %} collapsed{% endif %}" data-toggle="collapse" data-parent="#accordion" href="#filters" aria-expanded="{{ has_filters ? 'true' : 'false' }}">
+                <h4 class="card-title">Filters</h4>
+            </a>
+            <div id="filters" class="panel-collapse in collapse{% if has_filters %} show{% endif %}">
+                <div class="card-body">
+                    {% set filters_form = admin.page.filters %}
+
+                    {% form_theme filters_form '@Admin/form_fields.html.twig' %}
+
+                    {{ form_start(filters_form) }}
+                        {{ form_rest(filters_form) }}
+
+                        <div class="form-group">
+                            <div class="d-flex align-items-center justify-content-end">
+                                <a class="btn btn-danger mr-2" href="{{ admin_path('list', admin.code) }}">
+                                    {{ 'admin.filter.button.label_reset'|trans }}
+                                </a>
+                                <button class="btn btn-default" type="submit">{{ 'admin.filter.button.label_filter'|trans }}</button>
+                            </div>
+                        </div>
+                    {{ form_end(filters_form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

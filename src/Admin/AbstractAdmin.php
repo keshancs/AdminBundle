@@ -3,19 +3,25 @@
 namespace AdminBundle\Admin;
 
 use AdminBundle\Controller\AdminController;
-use AdminBundle\Route\RouteGenerator;
+use AdminBundle\Mapper\FilterMapper;
+use AdminBundle\Mapper\FormMapper;
+use AdminBundle\Mapper\ListMapper;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\Persistence\ObjectRepository;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
+abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, TemplateRegistryInterface
 {
     /**
      * @var string $controller
@@ -31,6 +37,11 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
      * @var string
      */
     protected $class;
+
+    /**
+     * @var Request
+     */
+    protected $request;
 
     /**
      * @var Pool
@@ -68,22 +79,29 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     protected $translator;
 
     /**
-     * @var RouteGenerator
+     * @var TemplateRegistryInterface
      */
-    protected $routeGenerator;
+    protected $templateRegistry;
 
     /**
-     * @var string[] $templates
+     * @var SettingManager
      */
-    protected $templates = [
-        'list' => '@Admin/CRUD/list.html.twig',
-        'edit' => '@Admin/CRUD/edit.html.twig',
-    ];
+    protected $settingManager;
 
     /**
-     * @var string
+     * @var Page
      */
-    protected $identifier = 'id';
+    protected $page;
+
+    /**
+     * @var ClassMetadata
+     */
+    protected $classMetadata;
+
+    /**
+     * @var string|null
+     */
+    protected $identifier;
 
     /**
      * @var string
@@ -106,6 +124,14 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     protected $formOptions = [];
 
     /**
+     * @var string[]
+     */
+    private $sorting = [
+        'sort_by'    => 'id',
+        'sort_order' => 'ASC',
+    ];
+
+    /**
      * @param string $code
      * @param string $class
      *
@@ -113,10 +139,51 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
      */
     public function __construct(string $code, string $class)
     {
-        $this->controller = AdminController::class;
-        $this->code       = $code;
-        $this->class      = $class;
-        $this->name       = strtolower((new ReflectionClass($class))->getShortName());
+        $this->controller       = AdminController::class;
+        $this->code             = $code;
+        $this->class            = $class;
+        $this->name             = strtolower((new ReflectionClass($class))->getShortName());
+        $this->templateRegistry = new TemplateRegistry();
+    }
+
+    /**
+     * @return TemplateRegistryInterface
+     */
+    public function getTemplateRegistry()
+    {
+        return $this->templateRegistry;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getTemplate(string $name)
+    {
+        return $this->getTemplateRegistry()->getTemplate($name);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setTemplate(string $name, string $path)
+    {
+        $this->getTemplateRegistry()->setTemplate($name, $path);
+    }
+
+    /**
+     * @return SettingManager
+     */
+    public function getSettingManager()
+    {
+        return $this->settingManager;
+    }
+
+    /**
+     * @param SettingManager $settingManager
+     */
+    public function setSettingManager($settingManager)
+    {
+        $this->settingManager = $settingManager;
     }
 
     /**
@@ -144,21 +211,28 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     }
 
     /**
-     * @return ListMapper|null
+     * @inheritDoc
      */
-    public function getList()
+    public function getPage()
     {
-        $this->buildList();
+        $this->buildPage();
 
-        return $this->list;
+        return $this->page;
     }
 
     /**
-     *
+     * @return Page
      */
-    private function buildList()
+    private function buildPage()
     {
-        $this->list = new ListMapper();
+        if (!$this->page) {
+            $filters  = $this->request->get('filter', []);
+            $page     = new Page($this, $filters);
+
+            $this->page = $page;
+        }
+
+        return $this->page;
     }
 
     /**
@@ -221,7 +295,7 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
      */
     private function configureFormBuilder(FormBuilderInterface $builder)
     {
-        $mapper = new FormMapper($builder);
+        $mapper = new FormMapper($this, $builder);
 
         $this->configureFormFields($mapper);
     }
@@ -255,17 +329,27 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
      *
      * @return string|null
      */
-    public function getRoute(string $route)
+    public function getRouteName(string $route)
     {
-        return $this->routes[$route] ?? null;
+        return 'admin_' . $this->name . '_' . $route;
     }
 
     /**
-     * @param array $routes
+     * @param string $route
+     *
+     * @return string|null
      */
-    public function setRoutes(array $routes)
+    public function getRoutePath(string $route)
     {
-        $this->routes = $routes;
+        return $this->routes[$route]['path'] ?? null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setRoute(string $route, string $routeName, string $routePath)
+    {
+        $this->routes[$route] = ['name' => $routeName, 'path' => $routePath];
     }
 
     /**
@@ -289,40 +373,57 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     }
 
     /**
-     * @param string $route
-     *
-     * @return string|null
-     */
-    public function getTemplate(string $route)
-    {
-        return $this->templates[$route] ?? null;
-    }
-
-    /**
-     * @param string $route
-     * @param string $template
-     */
-    public function setTemplate(string $route, string $template)
-    {
-        $this->templates[$route] = $template;
-    }
-
-    /**
      * @return string
+     * @throws MappingException
      */
     public function getIdentifier()
     {
+        if (!$this->identifier) {
+            $this->identifier = $this->classMetadata->getSingleIdentifierFieldName();
+        }
+
         return $this->identifier;
     }
 
     /**
-     * @param string $identifier
-     *
-     * @return object|null
+     * @inheritDoc
      */
-    public function getObject(string $identifier)
+    public function getObject($id)
     {
-        return $this->getEntityManager()->find($this->getClass(), $identifier);
+        $object = $this->getRepository()->find($id);
+
+        $this->setSubject($object);
+
+        return $object;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function newInstance()
+    {
+        $class    = $this->getClass();
+        $instance = new $class();
+
+        $this->setSubject($instance);
+
+        return $instance;
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
+
+    /**
+     * @return Request|null
+     */
+    public function getRequest()
+    {
+        return $this->request;
     }
 
     /**
@@ -342,19 +443,20 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     }
 
     /**
-     * @return EntityManagerInterface
-     */
-    public function getEntityManager()
-    {
-        return $this->em;
-    }
-
-    /**
      * @param EntityManagerInterface $em
      */
     public function setEntityManager(EntityManagerInterface $em)
     {
-        $this->em = $em;
+        $this->em            = $em;
+        $this->classMetadata = $em->getClassMetadata($this->getClass());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getClassMetadata()
+    {
+        return $this->classMetadata;
     }
 
     /**
@@ -366,11 +468,34 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
     }
 
     /**
-     * @param RouteGenerator $routeGenerator
+     * @inheritDoc
      */
-    public function setRouteGenerator(RouteGenerator $routeGenerator)
+    public function isAction(string $action)
     {
-        $this->routeGenerator = $routeGenerator;
+        return $this->request->get('_route') == $this->getRouteName($action);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createQuery()
+    {
+        $qb = $this->em->createQueryBuilder();
+        $qb
+            ->select('o')
+            ->from($this->getClass(), 'o')
+            ->orderBy(sprintf('o.%s', $this->sorting['sort_by']), $this->sorting['sort_order'])
+        ;
+
+        return $qb;
+    }
+
+    /**
+     * @return ObjectRepository
+     */
+    public function getRepository()
+    {
+        return $this->em->getRepository($this->getClass());
     }
 
     /**
@@ -390,7 +515,7 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
             return null;
         }
 
-        return $this->routeGenerator->generate($this->routes[$name], $parameters, $referenceType);
+        return $this->router->generate($this->routes[$name], $parameters, $referenceType);
     }
 
     /**
@@ -414,6 +539,13 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface
      * @inheritDoc
      */
     public function configureFormFields(FormMapper $formMapper)
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configureFilters(FilterMapper $filterMapper)
     {
     }
 }

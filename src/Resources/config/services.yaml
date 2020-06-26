@@ -1,0 +1,90 @@
+services:
+    AdminBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
+    admin.security.login_form_authenticator:
+        public: true
+        class: AdminBundle\Security\LoginFormAuthenticator
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "@router"
+            - "@security.csrf.token_manager"
+            - "@security.user_password_encoder.generic"
+
+    admin.pool:
+        public: true
+        class: AdminBundle\Admin\Pool
+
+    admin.route_loader:
+        public: true
+        class: AdminBundle\Routing\RouteLoader
+        arguments:
+            - "@admin.pool"
+        tags:
+            - { name: routing.loader }
+
+    admin.router:
+        public: true
+        class: AdminBundle\Routing\Router
+        tags:
+            - { name: router, priority: 300 }
+
+    admin.service_listener:
+        class: AdminBundle\EventListener\AdminServiceListener
+        arguments:
+            - "@admin.pool"
+            - "@admin.route_loader"
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+
+    admin.twig.admin_extension:
+        public: true
+        class: AdminBundle\Twig\AdminExtension
+        arguments:
+            - "@router"
+            - "@admin.route_loader"
+            - "@admin.pool"
+            - "@parameter_bag"
+            - "@twig"
+            - "@property_accessor"
+            - "@admin.setting_manager"
+        tags:
+            - { name: twig.extension }
+
+    admin.twig.setting_extension:
+        public: true
+        class: AdminBundle\Twig\SettingExtension
+        arguments:
+            - "@admin.setting_manager"
+        tags:
+            - { name: twig.extension }
+
+    admin.twig.admin_menu_extension:
+        public: true
+        class: AdminBundle\Twig\AdminMenuExtension
+        tags:
+            - { name: twig.extension }
+
+    admin.setting_manager:
+        class: AdminBundle\Admin\SettingManager
+        arguments:
+            - "@doctrine.orm.entity_manager"
+
+    admin.page:
+        public: true
+        class: AdminBundle\Admin\PageAdmin
+        arguments:
+            - admin.page
+            - AdminBundle\Entity\Page
+        tags:
+            - { name: admin }
+
+    admin.setting:
+        public: true
+        class: AdminBundle\Admin\SettingAdmin
+        arguments:
+            - admin.setting
+            - AdminBundle\Entity\Setting
+        tags:
+            - { name: admin }

@@ -3,6 +3,7 @@
 namespace AdminBundle\Controller;
 
 use AdminBundle\Admin\AdminInterface;
+use AdminBundle\Datagrid\Filter;
 use Exception;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,26 +18,11 @@ class CoreController extends AbstractController
     protected $admin;
 
     /**
-     * @inheritDoc
+     * @param AdminInterface $admin
      */
-    public function setContainer(ContainerInterface $container): ?ContainerInterface
+    public function setAdmin(AdminInterface $admin)
     {
-        $previous = $this->container;
-        $this->container = $container;
-
-        $this->configure();
-
-        return $previous;
-    }
-
-    /**
-     * Configure
-     */
-    private function configure()
-    {
-        if ($adminCode = $this->getRequest()->get('_admin')) {
-            $this->admin = $this->container->get('admin.pool')->getAdminByAdminCode($adminCode);
-        }
+        $this->admin = $admin;
     }
 
     /**

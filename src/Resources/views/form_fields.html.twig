@@ -5,31 +5,19 @@
     {%- if type == 'range' or type == 'color' -%}
         {%- set required = false -%}
     {%- endif -%}
-    <div class="col-lg-6 col-md-12">
+    <div class="flex-fill">
         <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     </div>
-{%- endblock form_widget_simple -%}
+{%- endblock -%}
 
 {%- block choice_widget_collapsed -%}
-    <div class="col-lg-6 col-md-12">
-        {{ parent() }}
-    </div>
-{%- endblock choice_widget_collapsed -%}
-
-{%- block hidden_widget -%}
-    <div class="form-group row">
+    <div class="flex-fill">
         {{ parent() }}
     </div>
 {%- endblock -%}
 
-{%- block form_row -%}
-    {{ parent() }}
-
-    <div class="hr-line-dashed"></div>
-{%- endblock form_row -%}
-
 {%- block plain_widget -%}
-    <div class="col-lg-6 col-md-12">
+    <div class="flex-fill">
         <div class="form-control-static">{{ value }}</div>
     </div>
 {%- endblock -%}

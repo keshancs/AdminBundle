@@ -2,52 +2,54 @@
 
 {% block title %}Log in!{% endblock %}
 
-{% set body_class = 'gray-bg' %}
+{% set body_class = 'hold-transition login-page' %}
 
 {% block body %}
-    <div class="middle-box text-center loginscreen{% if parameter('admin.content.animate') %} animated fadeInDown{% endif %}">
-        <div>
-            <div>
-                <h1 class="logo-name">IN+</h1>
-            </div>
-            <h3>Welcome to IN+</h3>
-            <p>Perfectly designed and precisely prepared admin theme with over 50 pages with extra new web app views.</p>
-            <p>Login in. To see it in action.</p>
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="http://www.orols.lv/lv/">SIA <b>OROLS</b></a>
+        </div>
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Sign in to start your session</p>
 
-            <form class="m-t" role="form" method="post">
                 {% if error %}
                     <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
                 {% endif %}
 
-                {% if app.user %}
-                    <div class="mb-3">
-                        You are logged in as {{ app.user.username }}, <a href="{{ path('admin_logout') }}">Logout</a>
+                <form method="post">
+                    <div class="input-group mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="Username" value="{{ last_username }}" required autofocus />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
                     </div>
-                {% endif %}
-
-                <div class="form-group">
-                    <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus />
-                </div>
-
-                <div class="form-group">
-                    <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required />
-                </div>
-
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
-
-                {#
-                    Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-                    See https://symfony.com/doc/current/security/remember_me.html
-
-                    <div class="checkbox mb-3">
-                        <label>
-                            <input type="checkbox" name="_remember_me"> Remember me
-                        </label>
+                    <div class="input-group mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
                     </div>
-                #}
-
-                <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
-            </form>
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="icheck-primary">
+                                <input type="checkbox" name="_remember_me" id="remember" />
+                                <label for="remember">
+                                    Remember Me
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
+                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}
