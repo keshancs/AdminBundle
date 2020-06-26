@@ -174,6 +174,18 @@ class Page
     }
 
     /**
+     * @param string $locale
+     *
+     * @return Page|null
+     */
+    public function getTranslation(string $locale)
+    {
+        return $this->translations->filter(function (Page $translation) use ($locale) {
+            return $translation->getLocale() === $locale;
+        })->first();
+    }
+
+    /**
      * @return string
      */
     public function getLocale()

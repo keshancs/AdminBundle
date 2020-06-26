@@ -1,0 +1,9 @@
+{% extends '@Admin/CMS/layout.html.twig' %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+    {{ path('cms_page', { _page_id: 4 }) }}
+
+    {{ dump(page) }}
+{% endblock %}

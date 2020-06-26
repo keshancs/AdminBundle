@@ -4,7 +4,7 @@ namespace AdminBundle\Routing;
 
 use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
-use AdminBundle\Controller\AdminController;
+use AdminBundle\Controller\CmsController;
 use AdminBundle\Controller\SecurityController;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
@@ -79,7 +79,7 @@ final class RouteLoader extends Loader
                 continue;
             }
 
-            $controller = $config['security'] ? SecurityController::class : AdminController::class;
+            $controller = $config['security'] ? SecurityController::class : CmsController::class;
             $defaults   = ['_controller' => $controller . '::' . $route];
 
             array_unshift($routeName, $this->routePrefix);

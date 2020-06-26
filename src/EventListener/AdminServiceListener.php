@@ -5,10 +5,9 @@ namespace AdminBundle\EventListener;
 use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CoreController;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
-class AdminServiceListener
+final class AdminServiceListener
 {
     /**
      * @var Pool

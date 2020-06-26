@@ -25,16 +25,18 @@ services:
             - { name: routing.loader }
 
     admin.router:
-        public: true
+        decorates: 'router.default'
         class: AdminBundle\Routing\Router
-        tags:
-            - { name: router, priority: 300 }
+        arguments:
+            - "@admin.router.inner"
+            - "@service_container"
+            - "@doctrine.orm.entity_manager"
+            - "@request_stack"
 
     admin.service_listener:
         class: AdminBundle\EventListener\AdminServiceListener
         arguments:
             - "@admin.pool"
-            - "@admin.route_loader"
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
 

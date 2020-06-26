@@ -2,7 +2,7 @@
 
 namespace AdminBundle\Admin;
 
-use AdminBundle\Controller\AdminController;
+use AdminBundle\Controller\CmsController;
 use AdminBundle\Mapper\FilterMapper;
 use AdminBundle\Mapper\FormMapper;
 use AdminBundle\Mapper\ListMapper;
@@ -139,7 +139,7 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, Tem
      */
     public function __construct(string $code, string $class)
     {
-        $this->controller       = AdminController::class;
+        $this->controller       = CmsController::class;
         $this->code             = $code;
         $this->class            = $class;
         $this->name             = strtolower((new ReflectionClass($class))->getShortName());
