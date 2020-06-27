@@ -6,6 +6,7 @@ use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CmsController;
 use AdminBundle\Controller\SecurityController;
+use Symfony\Component\Config\Exception\LoaderLoadException;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -15,7 +16,7 @@ final class RouteLoader extends Loader
     /**
      * @var bool
      */
-    private $loaded = false;
+    private $loading = false;
 
     /**
      * @var array[]
@@ -59,73 +60,76 @@ final class RouteLoader extends Loader
     }
 
     /**
+     * @param string $name
+     * @param array  $config
+     *
+     * @return string
+     */
+    private function getRouteController(string $name, array $config)
+    {
+        $controller = $config['security'] ? SecurityController::class : CmsController::class;
+
+        return $controller . '::' . $name;
+    }
+
+    /**
      * @inheritDoc
      */
     public function load($resource, $type = null)
     {
-        $collection = new RouteCollection();
-
-        if ($this->loaded) {
-            return $collection;
+        if ($this->loading) {
+            throw new LoaderLoadException($resource, null, null, null, $type);
         }
 
-        foreach ($this->getRoutes() as $route => $config) {
-            $requirements = [];
-            $routeName    = $routePath = [$route];
+        $this->loading = true;
 
+        $collection = new RouteCollection();
+
+        foreach ($this->getRoutes() as $name => $config) {
             if ($config['crud']) {
-                $this->loadCRUD($collection, $route, $config['id']);
+                $this->loadCRUD($collection, $name, $config['id']);
 
                 continue;
             }
 
-            $controller = $config['security'] ? SecurityController::class : CmsController::class;
-            $defaults   = ['_controller' => $controller . '::' . $route];
+            $route = new Route('/' . $this->routePrefix . '/' . $name);
+            $route->setDefault('_controller', $this->getRouteController($name, $config));
 
-            array_unshift($routeName, $this->routePrefix);
-            array_unshift($routePath, '', $this->routePrefix);
-
-            $routeName = implode('_', $routeName);
-            $routePath = implode('/', $routePath);
-
-            $collection->add($routeName, new Route($routePath, $defaults, $requirements));
+            $collection->add($this->routePrefix . '_' . $name, $route);
         }
 
-        $this->loaded = true;
+        $this->loading = false;
 
         return $collection;
     }
 
     /**
      * @param RouteCollection $collection
-     * @param string          $route
+     * @param string          $name
      * @param bool            $id
      */
-    private function loadCRUD(RouteCollection $collection, string $route, bool $id)
+    private function loadCRUD(RouteCollection $collection, string $name, bool $id)
     {
         /** @var AdminInterface $admin */
         foreach ($this->pool->getServices() as $code => $admin) {
-            $routePath    = [$route];
-            $requirements = [];
-            $defaults     = [
-                '_controller' => sprintf('%s::%s', $admin->getController(), $route),
-                '_admin'      => $code,
-            ];
+            $route = new Route('/' . $this->routePrefix . '/' . $admin->getName());
 
             if ($id) {
-                array_unshift($routePath, '{id}');
-
-                $requirements['id'] = '\d+';
+                $route
+                    ->setPath($route->getPath() . '/{id}')
+                    ->setRequirement('id', '\d+')
+                ;
             }
 
-            array_unshift($routePath, '', $this->routePrefix, $admin->getName());
+            $route
+                ->setPath($route->getPath() . '/' . $name)
+                ->setDefaults([
+                    '_controller' => sprintf('%s::%s', $admin->getController(), $name),
+                    '_admin'      => $code,
+                ])
+            ;
 
-            $routePath  = implode('/', $routePath);
-
-            $collection->add(
-                $admin->getRouteName($route),
-                new Route($routePath, $defaults, $requirements)
-            );
+            $collection->add($admin->getRouteName($name), $route);
         }
     }
 

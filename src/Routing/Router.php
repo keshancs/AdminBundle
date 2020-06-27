@@ -6,7 +6,11 @@ use AdminBundle\Controller\CmsController;
 use AdminBundle\Entity\Page;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
+use Symfony\Component\Config\Resource\FileExistenceResource;
+use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Config\ContainerParametersResource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -187,27 +191,23 @@ final class Router implements RouterInterface
      */
     public function getRouteCollection()
     {
-// TODO: get rid of admin.route_loader and load routes here
-//
-//        $collection = $this->container->get('admin.route_loader')->load('admin', null);
-//        $this->resolveParameters($collection);
-//        $collection->addResource(new ContainerParametersResource($this->collectedParameters));
-//
-//        try {
-//            $containerFile = ($this->paramFetcher)('kernel.cache_dir').'/'.($this->paramFetcher)('kernel.container_class').'.php';
-//            if (file_exists($containerFile)) {
-//                $collection->addResource(new FileResource($containerFile));
-//            } else {
-//                $collection->addResource(new FileExistenceResource($containerFile));
-//            }
-//        } catch (ParameterNotFoundException $exception) {
-//        }
-//
-//        $collection->addCollection($this->router->getRouteCollection());
-//
-//        return $collection;
+        $collection = $this->container->get('admin.route_loader')->load('admin', null);
+        $this->resolveParameters($collection);
+        $collection->addResource(new ContainerParametersResource($this->collectedParameters));
 
-        return $this->router->getRouteCollection();
+        try {
+            $containerFile = ($this->paramFetcher)('kernel.cache_dir').'/'.($this->paramFetcher)('kernel.container_class').'.php';
+            if (file_exists($containerFile)) {
+                $collection->addResource(new FileResource($containerFile));
+            } else {
+                $collection->addResource(new FileExistenceResource($containerFile));
+            }
+        } catch (ParameterNotFoundException $exception) {
+        }
+
+        $collection->addCollection($this->router->getRouteCollection());
+
+        return $collection;
     }
 
     /**

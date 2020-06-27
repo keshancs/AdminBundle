@@ -48,22 +48,19 @@ class CoreController extends AbstractController
      * @param AdminInterface|null $admin
      * @param string|int|null     $id
      * @param array               $parameters
-     * @param int                 $status
      *
-     * @return RedirectResponse
+     * @return string
      */
-    protected function redirectToAdminRoute(string $route, AdminInterface $admin = null, $id = null, array $parameters = [], int $status = 302)
+    protected function generateAdminUrl(string $route, AdminInterface $admin = null, $id = null, array $parameters = [])
     {
         if (null === $admin) {
             $admin = $this->admin;
         }
 
         if ($id) {
-            $url = $admin->generateObjectUrl($route, $id, $parameters);
-        } else {
-            $url = $admin->generateUrl($route, $parameters);
+            return $admin->generateObjectUrl($route, $id, $parameters);
         }
 
-        return $this->redirect($url, $status);
+        return $admin->generateUrl($route, $parameters);
     }
 }

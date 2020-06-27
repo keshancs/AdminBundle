@@ -3,14 +3,22 @@
 namespace AdminBundle\Controller;
 
 use AdminBundle\Entity\Page;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CmsController extends CRUDController
 {
+    /**
+     * @return RedirectResponse
+     */
     public function index()
     {
-        return $this->redirectToAdminRoute('dashboard');
+        if ($this->getUser()) {
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
+        return $this->redirectToRoute('admin_login');
     }
 
     /**

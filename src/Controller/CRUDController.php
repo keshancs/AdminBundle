@@ -52,7 +52,7 @@ class CRUDController extends CoreController
 
             $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.edit_success'));
 
-            return $this->redirectToAdminRoute('edit', null, $object->getId());
+            return $this->redirect($this->generateAdminUrl('edit', null, $object->getId()));
         }
 
         return $this->render('@Admin/CRUD/create.html.twig', [
@@ -81,7 +81,7 @@ class CRUDController extends CoreController
 
             $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.edit_success'));
 
-            return $this->redirectToAdminRoute('edit', null, $object->getId());
+            return $this->redirect($this->generateAdminUrl('edit', null, $object->getId()));
         }
 
         return $this->render('@Admin/CRUD/edit.html.twig', [
@@ -104,7 +104,7 @@ class CRUDController extends CoreController
         if (!$locale = $request->get('locale', null)) {
             $this->addFlash('admin_flash_error', $this->admin->trans('admin.flash.translate_error'));
 
-            return $this->redirectToAdminRoute('edit', null, $object->getId());
+            return $this->redirect($this->generateAdminUrl('edit', null, $object->getId()));
         }
 
         $em          = $this->getDoctrine()->getManager();
@@ -125,6 +125,6 @@ class CRUDController extends CoreController
             $this->addFlash('admin_flash_success', $this->admin->trans('admin.flash.translate_success'));
         }
 
-        return $this->redirectToAdminRoute('edit', null, $translation->getId());
+        return $this->redirect($this->generateAdminUrl('edit', null, $translation->getId()));
     }
 }

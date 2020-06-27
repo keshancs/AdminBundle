@@ -21,8 +21,6 @@ services:
         class: AdminBundle\Routing\RouteLoader
         arguments:
             - "@admin.pool"
-        tags:
-            - { name: routing.loader }
 
     admin.router:
         decorates: 'router.default'
