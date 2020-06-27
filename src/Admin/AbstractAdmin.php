@@ -511,15 +511,11 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, Tem
      */
     public function generateUrl($name, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
-        if (0 === strpos($name, 'admin_')) {
-            return $this->router->generate($name, $parameters, $referenceType);
+        if (0 !== strpos($name, 'admin_')) {
+            $name = $this->getRouteName($name);
         }
 
-        if (!isset($this->routes[$name])) {
-            return null;
-        }
-
-        return $this->router->generate($this->routes[$name], $parameters, $referenceType);
+        return $this->router->generate($name, $parameters, $referenceType);
     }
 
     /**

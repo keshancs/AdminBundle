@@ -6,6 +6,7 @@ use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CmsController;
 use AdminBundle\Controller\SecurityController;
+use Exception;
 use Symfony\Component\Config\Exception\LoaderLoadException;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Route;
@@ -138,7 +139,7 @@ final class RouteLoader extends Loader
      */
     public function supports($resource, $type = null)
     {
-        return $type === 'admin';
+        return $resource === 'admin.route_loader';
     }
 
     /**

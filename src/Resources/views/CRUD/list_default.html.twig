@@ -1,5 +1,9 @@
 {% extends '@Admin/CRUD/base_list_field.html.twig' %}
 
 {% block field %}
-    {{ value }}
+    {% if column.propertyPath == admin.identifier %}
+        <a href="{{ admin_path('edit', admin.code, { id: value }) }}">{{ value }}</a>
+    {% else %}
+        {{ value }}
+    {% endif %}
 {% endblock %}

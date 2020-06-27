@@ -21,6 +21,8 @@ services:
         class: AdminBundle\Routing\RouteLoader
         arguments:
             - "@admin.pool"
+        tags:
+            - { name: routing.loader }
 
     admin.router:
         decorates: 'router.default'
@@ -88,3 +90,11 @@ services:
             - AdminBundle\Entity\Setting
         tags:
             - { name: admin }
+
+    admin.page_listener:
+        public: true
+        class: AdminBundle\EventListener\PageListener
+        arguments:
+            - "%kernel.default_locale%"
+        tags:
+            - { name: doctrine.orm.entity_listener, event: preUpdate }

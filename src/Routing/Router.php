@@ -6,12 +6,7 @@ use AdminBundle\Controller\CmsController;
 use AdminBundle\Entity\Page;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
-use Symfony\Component\Config\Resource\FileExistenceResource;
-use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\DependencyInjection\Config\ContainerParametersResource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
-use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RequestContext;
@@ -51,16 +46,6 @@ final class Router implements RouterInterface
     private $route;
 
     /**
-     * @var array $collectedParameters
-     */
-    private $collectedParameters = [];
-
-    /**
-     * @var array $paramFetcher
-     */
-    private $paramFetcher;
-
-    /**
      * @param RouterInterface        $router
      * @param ContainerInterface     $container
      * @param EntityManagerInterface $em
@@ -80,7 +65,6 @@ final class Router implements RouterInterface
         $this->pageRepo     = $em->getRepository(Page::class);
         $this->requestStack = $requestStack;
         $this->route        = $route;
-        $this->paramFetcher = [$this->container, 'getParameter'];
     }
 
     /**
@@ -187,105 +171,10 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @return void
+     * @return RouteCollection
      */
     public function getRouteCollection()
     {
-        $collection = $this->container->get('admin.route_loader')->load('admin', null);
-        $this->resolveParameters($collection);
-        $collection->addResource(new ContainerParametersResource($this->collectedParameters));
-
-        try {
-            $containerFile = ($this->paramFetcher)('kernel.cache_dir').'/'.($this->paramFetcher)('kernel.container_class').'.php';
-            if (file_exists($containerFile)) {
-                $collection->addResource(new FileResource($containerFile));
-            } else {
-                $collection->addResource(new FileExistenceResource($containerFile));
-            }
-        } catch (ParameterNotFoundException $exception) {
-        }
-
-        $collection->addCollection($this->router->getRouteCollection());
-
-        return $collection;
-    }
-
-    /**
-     * @param RouteCollection $collection
-     */
-    private function resolveParameters(RouteCollection $collection)
-    {
-        foreach ($collection as $route) {
-            foreach ($route->getDefaults() as $name => $value) {
-                $route->setDefault($name, $this->resolve($value));
-            }
-
-            foreach ($route->getRequirements() as $name => $value) {
-                $route->setRequirement($name, $this->resolve($value));
-            }
-
-            $route->setPath($this->resolve($route->getPath()));
-            $route->setHost($this->resolve($route->getHost()));
-
-            $schemes = [];
-            foreach ($route->getSchemes() as $scheme) {
-                $schemes = array_merge($schemes, explode('|', $this->resolve($scheme)));
-            }
-            $route->setSchemes($schemes);
-
-            $methods = [];
-            foreach ($route->getMethods() as $method) {
-                $methods = array_merge($methods, explode('|', $this->resolve($method)));
-            }
-            $route->setMethods($methods);
-            $route->setCondition($this->resolve($route->getCondition()));
-        }
-    }
-
-    /**
-     * @param $value
-     *
-     * @return array|string|string[]|null
-     */
-    private function resolve($value)
-    {
-        if (\is_array($value)) {
-            foreach ($value as $key => $val) {
-                $value[$key] = $this->resolve($val);
-            }
-
-            return $value;
-        }
-
-        if (!\is_string($value)) {
-            return $value;
-        }
-
-        $escapedValue = preg_replace_callback('/%%|%([^%\s]++)%/', function ($match) use ($value) {
-            // skip %%
-            if (!isset($match[1])) {
-                return '%%';
-            }
-
-            if (preg_match('/^env\((?:\w++:)*+\w++\)$/', $match[1])) {
-                throw new RuntimeException(sprintf('Using "%%%s%%" is not allowed in routing configuration.', $match[1]));
-            }
-
-            $resolved = ($this->paramFetcher)($match[1]);
-
-            if (\is_bool($resolved)) {
-                $resolved = (string) (int) $resolved;
-            }
-
-            if (\is_string($resolved) || is_numeric($resolved)) {
-                $this->collectedParameters[$match[1]] = $resolved;
-
-                return (string) $this->resolve($resolved);
-            }
-
-            throw new RuntimeException(sprintf('The container parameter "%s", used in the route configuration value "%s", must be a string or numeric, but it is of type "%s".', $match[1], $value, \gettype($resolved)));
-        }, $value);
-
-        return str_replace('%%', '%', $escapedValue);
+        return $this->router->getRouteCollection();
     }
 }
