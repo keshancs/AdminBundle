@@ -5,6 +5,8 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
+    {% form_theme form admin.formTheme %}
+
     {{ form_start(form) }}
         <div class="card card-primary card-outline card-tabs">
             {% if not admin.page.formTabs.empty %}

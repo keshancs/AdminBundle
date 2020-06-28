@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, TemplateRegistryInterface
+abstract class AbstractAdmin implements AdminInterface
 {
     /**
      * @var string $controller
@@ -117,6 +117,11 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, Tem
      * @var object|null
      */
     protected $subject;
+
+    /**
+     * @var string
+     */
+    protected $formTheme = '@Admin/form_fields.html.twig';
 
     /**
      * @var array
@@ -408,6 +413,22 @@ abstract class AbstractAdmin implements AdminInterface, TranslatorInterface, Tem
         $this->setSubject($instance);
 
         return $instance;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormTheme()
+    {
+        return $this->formTheme;
+    }
+
+    /**
+     * @param string $formTheme
+     */
+    public function setFormTheme(string $formTheme)
+    {
+        $this->formTheme = $formTheme;
     }
 
     /**

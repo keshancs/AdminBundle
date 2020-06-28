@@ -28,7 +28,7 @@ class CRUDController extends CoreController
      */
     public function list(Request $request)
     {
-        return $this->render('@Admin/CRUD/list.html.twig', [
+        return $this->render($this->admin->getTemplate('list'), [
             'admin'  => $this->admin,
             'result' => $this->admin->getPage()->getResults(),
         ]);
@@ -55,7 +55,7 @@ class CRUDController extends CoreController
             return $this->redirect($this->generateAdminUrl('edit', null, $object->getId()));
         }
 
-        return $this->render('@Admin/CRUD/create.html.twig', [
+        return $this->render($this->admin->getTemplate('create'), [
             'admin' => $this->admin,
             'form'  => $form->createView(),
         ]);
@@ -84,7 +84,7 @@ class CRUDController extends CoreController
             return $this->redirect($this->generateAdminUrl('edit', null, $object->getId()));
         }
 
-        return $this->render('@Admin/CRUD/edit.html.twig', [
+        return $this->render($this->admin->getTemplate('edit'), [
             'admin' => $this->admin,
             'form'  => $form->createView(),
         ]);

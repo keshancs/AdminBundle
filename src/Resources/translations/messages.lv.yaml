@@ -1,6 +1,7 @@
 admin:
     navigation:
         label_dashboard: Panelis
+        label_menus:     Navigācijas
         label_settings:  Iestātījumi
 
     filter:
@@ -20,6 +21,14 @@ admin:
         label_original: Oriģināls
         label_locale:   Valoda
         label_title:    Nosaukums
+
+        menu:
+            label_items: Ieraksti
+
+        menu_item:
+            label_type: Tips
+            label_page: Lapa
+            label_url: Links
 
         help:
             label_original: Ieraksts kas tiek pārtulkots

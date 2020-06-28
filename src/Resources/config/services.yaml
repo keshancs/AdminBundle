@@ -82,6 +82,15 @@ services:
         tags:
             - { name: admin }
 
+    admin.menu:
+        public: true
+        class: AdminBundle\Admin\MenuAdmin
+        arguments:
+            - admin.menu
+            - AdminBundle\Entity\Menu
+        tags:
+            - { name: admin }
+
     admin.setting:
         public: true
         class: AdminBundle\Admin\SettingAdmin

@@ -1,6 +1,7 @@
 admin:
     navigation:
         label_dashboard: Dashboard
+        label_menus:     Menus
         label_settings:  Settings
 
     filter:
@@ -20,6 +21,14 @@ admin:
         label_original: Original
         label_locale:   Locale
         label_title:    Title
+
+        menu:
+            label_items: Items
+
+        menu_item:
+            label_type: Type
+            label_page: Page
+            label_url: Link
 
         help:
             label_original: Record that is being translated

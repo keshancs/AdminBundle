@@ -1,3 +1,0 @@
-admin:
-    resource: 'admin.route_loader'
-    type: service

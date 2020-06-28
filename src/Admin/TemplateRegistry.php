@@ -7,7 +7,11 @@ class TemplateRegistry implements TemplateRegistryInterface
     /**
      * @var array
      */
-    private $templates = [];
+    private $templates = [
+        'list'   => '@Admin/CRUD/list.html.twig',
+        'create' => '@Admin/CRUD/create.html.twig',
+        'edit'   => '@Admin/CRUD/edit.html.twig',
+    ];
 
     /**
      * @inheritDoc

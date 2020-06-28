@@ -10,8 +10,9 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-interface AdminInterface
+interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
 {
     /**
      * @return string
@@ -69,6 +70,11 @@ interface AdminInterface
      * @return object
      */
     public function newInstance();
+
+    /**
+     * @param string $formTheme
+     */
+    public function setFormTheme(string $formTheme);
 
     /**
      * @param ListMapper $listMapper
