@@ -26,18 +26,15 @@ services:
         class: AdminBundle\Routing\RouteLoader
         arguments:
             - "@admin.pool"
+            - "@admin.router"
         tags:
             - { name: routing.loader }
 
-#    admin.router:
-#        public: true
-#        decorates: 'router.default'
-#        class: AdminBundle\Routing\Router
-#        arguments:
-#            - "@admin.router.inner"
-#            - "@service_container"
-#            - "@doctrine.orm.entity_manager"
-#            - "@request_stack"
+    admin.router:
+        public: true
+        class: AdminBundle\Routing\Router
+        arguments:
+            - "@doctrine.orm.entity_manager"
 
     admin.service_listener:
         class: AdminBundle\EventListener\AdminServiceListener
