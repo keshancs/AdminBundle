@@ -15,6 +15,6 @@ class AdminBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new AddDependencyCallsCompilerPass());
-        $container->addCompilerPass(new SetRouterPass());
+//        $container->addCompilerPass(new SetRouterPass());
     }
 }

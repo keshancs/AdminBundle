@@ -5,11 +5,14 @@ namespace AdminBundle\Admin;
 use AdminBundle\Mapper\FilterMapper;
 use AdminBundle\Mapper\FormMapper;
 use AdminBundle\Mapper\ListMapper;
+use AdminBundle\Mapper\RouteMapper;
+use AdminBundle\Routing\RouteLoader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
@@ -30,9 +33,29 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
     public function getName();
 
     /**
-     * @return Page
+     * @return string
      */
-    public function getPage();
+    public function getController();
+
+    /**
+     * @return object|null
+     */
+    public function getSubject();
+
+    /**
+     * @return AdminContext
+     */
+    public function getContext();
+
+    /**
+     * @return Request
+     */
+    public function getRequest();
+
+    /**
+     * @param Request $request
+     */
+    public function setRequest(Request $request);
 
     /**
      * @param EntityManagerInterface $em
@@ -72,9 +95,19 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
     public function newInstance();
 
     /**
+     * @return string
+     */
+//    public function getFormTheme();
+
+    /**
      * @param string $formTheme
      */
-    public function setFormTheme(string $formTheme);
+//    public function setFormTheme(string $formTheme);
+
+    /**
+     * @param Request $request
+     */
+    public function configure(Request $request);
 
     /**
      * @param ListMapper $listMapper
@@ -90,6 +123,11 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
      * @param FilterMapper $filterMapper
      */
     public function configureFilters(FilterMapper $filterMapper);
+
+    /**
+     * @param RouteLoader $routeLoader
+     */
+    public function configureRoutes(RouteLoader $routeLoader);
 
     /**
      * @param string $name
@@ -108,33 +146,31 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
      *
      * @return string|null
      */
-    public function generateObjectUrl($name, $objectId, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH);
+    public function generateObjectUrl(
+        $name,
+        $objectId,
+        array $parameters = [],
+        $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH
+    );
 
     /**
      * @param string $action
      *
      * @return bool
      */
-    public function isAction(string $action);
+    public function isRoute(string $action);
 
     /**
-     * @param string $route
+     * @param string $name
      *
-     * @return string|null
+     * @return string
      */
-    public function getRouteName(string $route);
+    public function getRouteName(string $name);
 
     /**
-     * @param string $route
+     * @param string $path
      *
-     * @return string|null
+     * @return string
      */
-    public function getRoutePath(string $route);
-
-    /**
-     * @param string $route
-     * @param string $routeName
-     * @param string $routePath
-     */
-    public function setRoute(string $route, string $routeName, string $routePath);
+    public function getRoutePath(string $path);
 }

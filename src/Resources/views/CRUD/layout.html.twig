@@ -1,34 +1,33 @@
 {% extends '@Admin/layout.html.twig' %}
 
-{% block content_container %}
-    <section class="content">
-        <div class="container-fluid">
+{%- block stylesheets -%}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('bundles/admin/css/pagetree.css') }}?v={{ date().timestamp }}" />
+{%- endblock -%}
+
+{%- block content_wrapper -%}
+    <main role="main" class="page-content flex-fill flex-shrink-0">
+        {%- include '@Admin/Elements/spinner.html.twig' -%}
+
+        <div class="container-fluid pt-3">
             {% block filters %}
                 {% include '@Admin/Elements/filters.html.twig' %}
             {% endblock %}
 
             {% for message in app.session.flashBag.get('admin_flash_success') %}
-                <div class="alert alert-success">
-                    <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                    {{ message }}
-                </div>
+                <div class="alert alert-success">{{ message }}</div>
             {% endfor %}
 
             {% for message in app.session.flashBag.get('admin_flash_error') %}
-                <div class="alert alert-danger">
-                    <h5><i class="icon fas fa-ban"></i> Alert!</h5>
-                    {{ message }}
-                </div>
+                <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
             {% for message in app.session.flashBag.get('admin_flash_info') %}
-                <div class="alert alert-info">
-                    <h5><i class="icon fas fa-info"></i> Alert!</h5>
-                    {{ message }}
-                </div>
+                <div class="alert alert-info">{{ message }}</div>
             {% endfor %}
-
-            {% block content %}{% endblock %}
         </div>
-    </section>
-{% endblock %}
+
+        {% block content %}{% endblock %}
+    </main>
+{%- endblock -%}

@@ -1,0 +1,10 @@
+{% set locale = app.request.get('_locale') %}
+
+<ul class="navbar-nav mr-auto flex-row">
+    <li class="nav-item mr-3 mr-lg-0{% if locale == 'lv' %} active{% endif %}">
+        <a class="nav-link" href="{{ cms_page_url({ locale: 'lv' }) }}">LV</a>
+    </li>
+    <li class="nav-item{% if locale == 'ru' %} active{% endif %}">
+        <a class="nav-link" href="{{ cms_page_url({ locale: 'ru' }) }}">RU</a>
+    </li>
+</ul>

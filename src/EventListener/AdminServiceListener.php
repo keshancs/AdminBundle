@@ -32,7 +32,7 @@ final class AdminServiceListener
         if ($adminCode = $request->get('_admin', null)) {
             /** @var AdminInterface $admin */
             $admin = $this->pool->getAdminByAdminCode($adminCode);
-            $admin->setRequest($request);
+            $admin->configure($request);
 
             /** @var CoreController $controller */
             $controller = $event->getController()[0];

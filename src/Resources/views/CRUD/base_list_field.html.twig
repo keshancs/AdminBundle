@@ -1,3 +1,3 @@
-<td>
+<{% if column.propertyPath == admin.identifier %}th scope="row"{% else %}td{% endif %}>
     {{ block('field') }}
-</td>
+</{% if column.propertyPath == admin.identifier %}th{% else %}td{% endif %}>

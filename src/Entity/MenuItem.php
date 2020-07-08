@@ -2,6 +2,7 @@
 
 namespace AdminBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -31,6 +32,14 @@ class MenuItem
     private $menu;
 
     /**
+     * @var MenuItem $parent
+     *
+     * @ORM\ManyToOne(targetEntity="MenuItem", inversedBy="items")
+     * @ORM\JoinColumn(fieldName="parent_id", referencedColumnName="menu_item_id", nullable=true)
+     */
+    private $parent;
+
+    /**
      * @var int $type
      *
      * @ORM\Column(name="type", type="integer")
@@ -53,6 +62,15 @@ class MenuItem
     private $url;
 
     /**
+     * @var ArrayCollection $pages
+     *
+     * @ORM\OneToMany(targetEntity="MenuItem", mappedBy="parent", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(referencedColumnName="menu_item_id")
+     * @ORM\OrderBy({"priority" : "ASC"})
+     */
+    private $items;
+
+    /**
      * @var int $priority
      *
      * @ORM\Column(name="priority", type="integer")
@@ -61,7 +79,8 @@ class MenuItem
 
     public function __construct()
     {
-        $this->type = self::TYPE_PAGE;
+        $this->type  = self::TYPE_PAGE;
+        $this->items = new ArrayCollection();
     }
 
     /**
@@ -88,6 +107,26 @@ class MenuItem
     public function setMenu($menu)
     {
         $this->menu = $menu;
+
+        return $this;
+    }
+
+    /**
+     * @return MenuItem
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param MenuItem $parent
+     *
+     * @return MenuItem
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
 
         return $this;
     }
@@ -150,6 +189,46 @@ class MenuItem
         $this->url = $url;
 
         return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getItems()
+    {
+        return $this->items;
+    }
+
+    /**
+     * @param ArrayCollection $items
+     *
+     * @return MenuItem
+     */
+    public function setItems($items)
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
+     * @param MenuItem $item
+     */
+    public function addItem(MenuItem $item)
+    {
+        $this->items->add($item);
+
+        $item->setParent($this);
+    }
+
+    /**
+     * @param MenuItem $item
+     */
+    public function removeItem(MenuItem $item)
+    {
+        $this->items->removeElement($item);
+
+        $item->setParent(null);
     }
 
     /**

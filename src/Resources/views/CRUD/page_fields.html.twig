@@ -1,0 +1,31 @@
+{% extends '@Admin/form_fields.html.twig' %}
+
+{%- block _page_original_widget -%}
+    {%- if required and placeholder is none and not placeholder_in_choices and not multiple and (attr.size is not defined or attr.size <= 1) -%}
+        {% set required = false %}
+    {%- endif -%}
+    {%- if disabled -%}
+        <div>
+            <a href="{{ admin_pool().getAdminByAdminCode(app.request.get('_admin')).generateObjectUrl('edit', data.id) }}">
+                <img src="{{ asset('bundles/admin/img/flags/' ~ data.locale ~ '.png') }}" alt="{{ data.locale }}" class="align-middle pb-1" /> {{ data.title }}
+            </a>
+        </div>
+    {%- else -%}
+        <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+            {%- if placeholder is not none -%}
+                <option value=""{% if required and value is empty %} selected="selected"{% endif %}>{{ placeholder != '' ? (translation_domain is same as(false) ? placeholder : placeholder|trans({}, translation_domain)) }}</option>
+            {%- endif -%}
+            {%- if preferred_choices|length > 0 -%}
+                {% set options = preferred_choices %}
+                {% set render_preferred_choices = true %}
+                {{- block('choice_widget_options') -}}
+                {%- if choices|length > 0 and separator is not none -%}
+                    <option disabled="disabled">{{ separator }}</option>
+                {%- endif -%}
+            {%- endif -%}
+            {%- set options = choices -%}
+            {%- set render_preferred_choices = false -%}
+            {{- block('choice_widget_options') -}}
+        </select>
+    {%- endif -%}
+{%- endblock -%}

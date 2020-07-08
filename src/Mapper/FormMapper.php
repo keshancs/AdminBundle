@@ -40,7 +40,7 @@ class FormMapper
      */
     public function beginTab(string $name)
     {
-        $this->admin->getPage()->getFormTabs()->set($this->tab = $name, []);
+        $this->admin->getContext()->getFormTabs()->set($this->tab = $name, []);
 
         return $this;
     }
@@ -65,11 +65,15 @@ class FormMapper
     public function add(string $name, string $type = null, array $options = [])
     {
         if ($this->tab) {
-            $this->admin->getPage()->getFormTabs()->add($this->tab, $name);
+            $this->admin->getContext()->getFormTabs()->add($this->tab, $name);
         }
 
         $defaultOptions = [
-            'label'      => sprintf('admin.form.label_%s', TranslationUtils::getLabel($name)),
+            'label'      => sprintf(
+                'admin.form.%s.label_%s',
+                $this->admin->getName(),
+                TranslationUtils::camelCaseToSnakeCase($name)
+            ),
             'row_attr'   => ['class' => 'form-group'],
             'attr'       => ['class' => 'form-control'],
         ];

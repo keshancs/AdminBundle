@@ -1,0 +1,84 @@
+{% extends '@Admin/CRUD/edit.html.twig' %}
+
+{%- block javascripts -%}
+    {{ parent() }}
+
+    <script>
+        const FormHelper = new function() {
+            this.adminName = 'page';
+            this.fields    = [];
+
+            this.on = (fieldName, event, callback) => {
+                this.getField(fieldName).on(event, e => callback($(e.currentTarget), e));
+            }
+
+            this.hideField = fieldName => {
+                this.getField(fieldName).hide();
+            }
+
+            this.showField = fieldName => {
+                this.getField(fieldName).show();
+            }
+
+            this.hideRow = (fieldName, rowClass) => {
+                this.getField(fieldName).closest(rowClass).hide();
+            }
+
+            this.showRow = (fieldName, rowClass) => {
+                this.getField(fieldName).closest(rowClass).show();
+            }
+
+            this.hideRows = (fieldNames, rowClass) => {
+                const self = this;
+
+                fieldNames.forEach(function (fieldName) {
+                    self.hideRow(fieldName, rowClass);
+                });
+            }
+
+            this.showRows = (fieldNames, rowClass) => {
+                const self = this;
+
+                fieldNames.forEach(function (fieldName) {
+                    self.showRow(fieldName, rowClass);
+                });
+            }
+
+            this.toggleRows = (fieldNames, rowClass, condition) => {
+                this[condition ? 'hideRows' : 'showRows'](fieldNames, rowClass);
+            }
+
+            this.disableField = fieldName => {
+                this.getField(fieldName).prop('disabled', true);
+            }
+
+            this.enableField = fieldName => {
+                this.getField(fieldName).prop('disabled', false);
+            }
+
+            this.toggleDisableField = (fieldName, condition) => {
+                this.getField(fieldName).prop('disabled', condition);
+            }
+
+            this.getField = fieldName => {
+                if (this.fields[fieldName]) {
+                    return this.fields[fieldName];
+                }
+
+                this.fields[fieldName] = $('#' + this.adminName + '_' + fieldName);
+
+                return this.fields[fieldName];
+            }
+        };
+
+        $(function() {
+            FormHelper.on('isHomePage', 'change', ($target, e) => {
+                FormHelper.toggleRows(['parent', 'slug', 'isManualSlug'], '.form-group', $target.is(':checked'));
+            });
+
+            FormHelper.on('isManualSlug', 'change', ($target, e) => {
+                FormHelper.toggleDisableField('slug', !$target.is(':checked'));
+            });
+        });
+    </script>
+{%- endblock -%}

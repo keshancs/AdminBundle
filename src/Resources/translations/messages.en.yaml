@@ -17,10 +17,15 @@ admin:
         label_id: ID
 
     form:
-        label_parent:   Parent
-        label_original: Original
-        label_locale:   Locale
-        label_title:    Title
+        page:
+            label_parent:          Parent
+            label_original:        Original
+            label_locale:          Locale
+            label_title:           Title
+            label_menu_title:      Menu Title
+            label_seo_title:       Title
+            label_seo_keywords:    Keywords
+            label_seo_description: Description
 
         menu:
             label_items: Items

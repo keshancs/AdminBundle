@@ -14,7 +14,7 @@ class SettingController extends CRUDController
     public function list(Request $request)
     {
         $modelData = [];
-        $form      = $this->admin->getForm();
+        $form      = $this->admin->getContext()->getForm();
 
         foreach ($this->admin->getRepository()->findAll() as $setting) {
             $modelData[$setting->getName()] = $setting->getValue();

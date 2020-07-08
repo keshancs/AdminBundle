@@ -31,7 +31,7 @@ class Pool
     }
 
     /**
-     * @return array
+     * @return array|AdminInterface[]
      */
     public function getServices()
     {
@@ -49,7 +49,7 @@ class Pool
     /**
      * @param string $code
      *
-     * @return mixed
+     * @return AdminInterface|null
      */
     public function getAdminByAdminCode(string $code)
     {

@@ -22,6 +22,8 @@ class MenuItemType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $nestingLevel = $options['nesting_level'];
+
         $builder
             ->add('type', ChoiceType::class, [
                 'attr'     => ['class' => 'select2bs4 form-control'],
@@ -32,6 +34,24 @@ class MenuItemType extends AbstractType
                 'label'    => 'admin.form.menu_item.label_type',
                 'row_attr' => ['class' => 'mr-1 js-menu-item-type', 'style' => 'width: 100px'],
             ])
+        ;
+
+        if ($nestingLevel + 1 < $options['max_nesting_level']) {
+            $builder
+                ->add('items', CollectionType::class, [
+                    'label'         => 'admin.form.menu.label_items',
+                    'allow_add'     => true,
+                    'allow_delete'  => true,
+                    'attr'          => ['class' => 'collection list-group'],
+                    'by_reference'  => false,
+                    'entry_options' => ['label' => false, 'nesting_level' => $nestingLevel + 1],
+                    'entry_type'    => MenuItemType::class,
+                    'sortable'      => true,
+                ])
+            ;
+        }
+
+        $builder
             ->add('priority', HiddenType::class, [
                 'attr'  => ['class' => 'js-menu-item-priority'],
                 'label' => false,
@@ -46,6 +66,7 @@ class MenuItemType extends AbstractType
                     ->add('page', EntityType::class, [
                         'attr'          => ['class' => 'select2bs4 form-control'],
                         'class'         => Page::class,
+                        'choice_label'  => 'collectionTitle',
                         'label'         => 'admin.form.menu_item.label_page',
                         'placeholder'   => 'admin.form.placeholder.label_select',
                         'required'      => $isPage,
@@ -81,9 +102,9 @@ class MenuItemType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => MenuItem::class,
+            'data_class'         => MenuItem::class,
+            'nesting_level'      => 0,
+            'max_nesting_level'  => 10,
         ]);
-
-        parent::configureOptions($resolver);
     }
 }

@@ -2,22 +2,21 @@
 
 namespace AdminBundle\Controller;
 
-use AdminBundle\Admin\AdminDecoratorInterface;
 use AdminBundle\Admin\AdminInterface;
-use AdminBundle\Datagrid\Filter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class CoreController extends AbstractController
 {
     /**
-     * @var AdminInterface|AdminDecoratorInterface
+     * @var AdminInterface
      */
     protected $admin;
 
     /**
-     * @param AdminInterface|AdminDecoratorInterface $admin
+     * @param AdminInterface $admin
      */
     public function setAdmin($admin)
     {

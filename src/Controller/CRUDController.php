@@ -30,7 +30,7 @@ class CRUDController extends CoreController
     {
         return $this->render($this->admin->getTemplate('list'), [
             'admin'  => $this->admin,
-            'result' => $this->admin->getPage()->getResults(),
+            'result' => $this->admin->getContext()->getResults(),
         ]);
     }
 
@@ -44,7 +44,7 @@ class CRUDController extends CoreController
         $object = $this->admin->newInstance();
 
         /** @var FormInterface $form */
-        $form = $this->admin->getForm();
+        $form = $this->admin->getContext()->getForm();
         $form->setData($object)->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -73,7 +73,7 @@ class CRUDController extends CoreController
         $object = $this->admin->getObject($id);
 
         /** @var FormInterface $form */
-        $form = $this->admin->getForm();
+        $form = $this->admin->getContext()->getForm();
         $form->setData($object)->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

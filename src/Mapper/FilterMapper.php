@@ -83,7 +83,7 @@ class FilterMapper
     {
         $filterOptions = [
             'attr'        => ['class' => 'd-flex flex-fill'],
-            'label'       => sprintf('admin.filter.label_%s', TranslationUtils::getLabel($propertyPath)),
+            'label'       => sprintf('admin.filter.label_%s', TranslationUtils::camelCaseToSnakeCase($propertyPath)),
             'label_attr'  => ['class' => 'font-weight-bold w-25 flex-shrink-0'],
             'row_attr'    => ['class' => 'form-group d-flex align-items-center'],
         ];

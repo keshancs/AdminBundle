@@ -1,0 +1,5 @@
+{% extends '@Admin/CRUD/base_list_field.html.twig' %}
+
+{%- block field -%}
+    <span data-toggle="tooltip" title="{{ object.path }}">{{ value }}</span>
+{%- endblock -%}

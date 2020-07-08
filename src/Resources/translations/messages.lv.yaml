@@ -14,24 +14,40 @@ admin:
             label_filter: Pielietot filtrus
 
     list:
-        label_id: ID
-
-    form:
-        label_parent:   Vecāks
-        label_original: Oriģināls
-        label_locale:   Valoda
-        label_title:    Nosaukums
+        page:
+            label_id:     ID
+            label_title:  Nosaukums
+            label_locale: Tulkojumi
 
         menu:
+            label_id:     ID
+            label_name:   Nosaukums
+
+    form:
+        page:
+            label_parent:          Vecāks
+            label_original:        Oriģināls
+            label_locale:          Valoda
+            label_title:           Nosaukums
+            label_menu_title:      Nosaukums navigācijās
+            label_seo_title:       Nosaukums
+            label_seo_keywords:    Atslēgvārdi
+            label_seo_description: Apraksts
+
+            help:
+                label_original: Ieraksts kas tiek pārtulkots
+
+        menu:
+            label_name:  Nosaukums
             label_items: Ieraksti
+
+            help:
+                label_name: Šis nosaukums netiek attēlots klientiem
 
         menu_item:
             label_type: Tips
             label_page: Lapa
             label_url: Links
-
-        help:
-            label_original: Ieraksts kas tiek pārtulkots
 
         placeholder:
             label_select: Lūdzu izvēlies

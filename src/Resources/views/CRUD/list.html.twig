@@ -9,42 +9,37 @@
 {% block content %}
     <div class="d-flex justify-content-end mb-3">
         <a href="{{ admin_path('create', admin.code) }}" class="btn btn-default">
-            <i class="fas fa-plus"></i> Create
+            <span data-feather="plus"></span> Create
         </a>
     </div>
 
     {% if result|length > 0 %}
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">{{ admin.class }}</h3>
-            </div>
-            <div class="card-body table-responsive p-0">
-                <form action="" method="post">
-                    <table class="table table-hover text-nowrap">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                {% for column in admin.page.list %}
-                                    <th>{{ column.label|trans }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for index, data in result %}
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" class="i-checks" name="idx[]" value="{{ data.id }}" />
-                                    </td>
-                                    {% for column in admin.page.list %}
-                                        {{ render_list_element(admin, column, data) }}
-                                    {% endfor %}
-                                </tr>
+        <form action="" method="post">
+            <table class="table">
+                <thead class="thead-light">
+                    <tr>
+                        <th>&nbsp;</th>
+                        {% for column in admin.context.list %}
+                            <th>{{ column.label|trans }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for index, data in result %}
+                        <tr>
+                            <td>
+                                <label>
+                                    <input type="checkbox" class="i-checks" name="idx[]" value="{{ data.id }}" />
+                                </label>
+                            </td>
+                            {% for column in admin.context.list %}
+                                {{ render_list_element(admin, column, data) }}
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-        </div>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
     {% else %}
         <div class="callout callout-info">
             <h5>Information!</h5>

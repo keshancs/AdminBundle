@@ -1,0 +1,18 @@
+<ul class="pagetree-toolbar border-bottom">
+    <li>
+        <a href="javascript:void(0);" class="pagetree-toolbar-item" data-type="Standard">
+            <img src="{{ asset('bundles/admin/icons/page_white.png') }}" class="align-middle pb-1" />
+        </a>
+    </li>
+    <li>
+        <a href="javascript:void(0);" class="pagetree-toolbar-item" data-type="Folder">
+            <img src="{{ asset('bundles/admin/icons/folder.png') }}" class="align-middle pb-1" />
+        </a>
+    </li>
+</ul>
+
+<ul class="tree page-tree">
+    {% for page in pages %}
+        {% include '@Admin/CMS/page_tree_node.html.twig' %}
+    {% endfor %}
+</ul>

@@ -1,3 +1,7 @@
+{%- set admin_code = app.request.get('_admin', null) %}
+{%- if admin_code -%}
+    {%- set admin = admin_pool().getAdminByAdminCode(admin_code) -%}
+{%- endif -%}
 <!DOCTYPE html>
 <html>
     <head>
@@ -5,83 +9,697 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        {% block stylesheets %}
-            <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet" />
-            <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/fontawesome-free/css/all.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/daterangepicker/daterangepicker.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/select2/css/select2.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/admin/css/adminlte.min.css') }}" />
-{#            <link rel="stylesheet" href="{{ asset('bundles/admin/css/style.css') }}" />#}
-        {% endblock %}
+        {%- block stylesheets -%}
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous" />
+            <link rel="stylesheet" href="{{ asset('bundles/admin/css/dashboard.css') }}?v={{ date().timestamp }}" />
+        {%- endblock -%}
     </head>
     {% block body_container %}
         <body class="{{ body_class|default('hold-transition sidebar-mini sidebar-collapse layout-navbar-fixed') }}">
             {% block body %}
                 <div id="wrapper">
-                    {% include '@Admin/Elements/navbar.html.twig' %}
-                    {% include '@Admin/Elements/sidebar.html.twig' %}
-
-                    {% block content_wrapper %}
-                        <div class="content-wrapper">
-                            {% block content_header %}
-                                <section class="content-header">
-                                    <div class="container-fluid">
-                                        <div class="row mb-2">
-                                            <div class="col-sm-6">
-                                                {% block header %}{% endblock %}
-                                            </div>
-                                            <div class="col-sm-6">
-                                                {% block breadcrumbs %}{% endblock %}
-                                            </div>
+                    {%- include '@Admin/Elements/navbar.html.twig' -%}
+                    {%- block content_container -%}
+                        <div class="d-flex align-items-stretch">
+                            {%- include '@Admin/Elements/sidebar.html.twig' -%}
+                            {%- if admin is defined and admin and admin.context.showPageSidebar -%}
+                                <nav class="pagetree-sidebar flex-shrink-0 bg-light">
+                                    {%- include '@Admin/Elements/spinner.html.twig' -%}
+                                    {{- render_page_tree() -}}
+                                </nav>
+                            {%- endif -%}
+                            {%- block content_wrapper -%}
+                                <main role="main" class="page-content flex-fill flex-shrink-0">
+                                    <div class="spinner-container d-none">
+                                        <div class="spinner-border" role="status">
+                                            <span class="sr-only">Loading...</span>
                                         </div>
                                     </div>
-                                </section>
-                            {% endblock %}
-
-                            {% block content_container %}
-                                <section class="content">
-                                    <div class="container-fluid">
-                                        {% block content %}{% endblock %}
-                                    </div>
-                                </section>
-                            {% endblock %}
+                                    {%- block content -%}{%- endblock -%}
+                                </main>
+                            {%- endblock -%}
                         </div>
-                    {% endblock %}
+                    {%- endblock -%}
                 </div>
             {% endblock %}
 
             {% block javascripts %}
-                <script src="{{ asset('bundles/admin/plugins/jquery/jquery.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/select2/js/select2.full.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/moment/moment.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/inputmask/min/jquery.inputmask.bundle.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/daterangepicker/daterangepicker.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
-                <script src="{{ asset('bundles/admin/js/adminlte.min.js') }}"></script>
+                <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+                <script src="{{ asset('bundles/admin/js/feather.min.js') }}"></script>
                 <script>
-                    $(function () {
-                        $('.select2bs4').each(function () {
-                            let $hidden = $(this).closest('.collapse:not(.show)');
+                    function Manager(context, selector) {
+                        this.collection = Array.from(context.querySelectorAll(selector));
 
-                            $hidden.addClass('show');
+                        Manager.prototype.find = selector => {
+                            let collection = [];
 
-                            $(this).select2({
-                                theme: 'bootstrap4',
-                                width: 'style',
-                                placeholder: '{{ 'admin.form.placeholder.label_select'|trans }}'
+                            this.collection.forEach(parentElement => {
+                                parentElement.querySelectorAll(selector).forEach(element => {
+                                    collection.push(element);
+                                });
                             });
 
-                            $hidden.removeClass('show');
-                        });
+                            this.collection = collection;
+
+                            return this;
+                        }
+
+                        Manager.prototype.hasClass = className => {
+                            this.collection.forEach(element => {
+                                if (element.classList.contains(className)) {
+                                    return true;
+                                }
+                            });
+
+                            return false;
+                        }
+
+                        Manager.prototype.addClass = className => {
+                            this.collection.forEach(element => {
+                                element.classList.add(className);
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.removeClass = className => {
+                            this.collection.forEach(element => {
+                                element.classList.remove(className);
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.hide = () => {
+                            this.collection.forEach(element => {
+                                element.style.display = 'none';
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.show = () => {
+                            this.collection.forEach(element => {
+                                element.removeAttribute('style');
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.text = () => {
+                            this.collection.forEach(element => {
+                                return element.innerText;
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.html = () => {
+                            this.collection.forEach(element => {
+                                return element.innerHTML;
+                            });
+
+                            return this;
+                        }
+
+                        Manager.prototype.data = (name, value) => {
+                            if (value) {
+                                this.collection.forEach(element => {
+                                    element.dataset[name] = value;
+                                });
+
+                                return this;
+                            }
+
+                            this.collection.forEach(element => {
+                                return element.dataset[name];
+                            });
+
+                            return null;
+                        }
+                    }
+
+                    const _ = (selector) => new Manager(document, selector);
+
+                    /* globals feather:false */
+                    (function () {
+                        'use strict'
+
+                        feather.replace();
+                    }());
+
+                    $(function () {
+                        {%- if admin is defined and admin and admin.context.showPageSidebar -%}
+                            {%- set page_admin = admin_pool().getAdminByAdminCode('admin.page') -%}
+                            // if ($('.page-sidebar').length) {
+                            //     $('.content-wrapper').split({ orientation: 'vertical', limit: 259, position: '260px' });
+
+                            {#    let createFromTreeUrl = '{{ page_admin.generateUrl('create_from_tree') }}';#}
+                            {#    let updateFromTreeUrl = '{{ page_admin.generateUrl('update_from_tree') }}';#}
+                            {#    let spinnerInterval, $clone;#}
+
+                            {#    const $spinnerContainer = $('.spinner-container');#}
+
+                            {#    $('.js-pagetree-toolbar').sortable({#}
+                            {#        group: 'nested',#}
+                            {#        drop: false,#}
+                            {#        onDragStart: function ($item, container, _super) {#}
+                            {#            $('.tree').addClass('dragged');#}
+
+                            {#            if (!$item.data('id')) {#}
+                            {#                $clone = $item.clone();#}
+                            {#                $clone.insertAfter($item).hide();#}
+                            {#            }#}
+
+                            {#            _super($item, container);#}
+                            {#        },#}
+                            {#        onDrop: function ($item, container, _super) {#}
+                            {#            $('.tree').removeClass('dragged');#}
+
+                            {#            $spinnerContainer.removeClass('d-none');#}
+
+                            {#            const parentId = container.el.closest('li').data('id');#}
+
+                            {#            let data = {};#}
+                            {#            if (parentId) {#}
+                            {#                data['parent_id'] = parentId;#}
+                            {#            }#}
+
+                            {#            if ($item.data('id')) {#}
+                            {#                data['page_id'] = $item.data('id');#}
+
+                            {#                $.ajax({#}
+                            {#                    dataType: 'json',#}
+                            {#                    url: updateFromTreeUrl,#}
+                            {#                    method: 'POST',#}
+                            {#                    data: data,#}
+                            {#                    error: function (xhr, status, err) {#}
+                            {#                        $item.remove();#}
+
+                            {#                        $spinnerContainer.addClass('d-none');#}
+
+                            {#                        clearInterval(spinnerInterval);#}
+                            {#                    }#}
+                            {#                }).done(function () {#}
+                            {#                    $spinnerContainer.addClass('d-none');#}
+
+                            {#                    clearInterval(spinnerInterval);#}
+
+                            {#                    _super($item, container);#}
+                            {#                });#}
+
+                            {#                return;#}
+                            {#            }#}
+
+                            {#            $clone.show();#}
+
+                            {#            $.ajax({#}
+                            {#                dataType: 'json',#}
+                            {#                url: createFromTreeUrl,#}
+                            {#                method: 'POST',#}
+                            {#                data: data,#}
+                            {#                success: function (data) {#}
+                            {#                    $item.attr('href', data.path);#}
+                            {#                    $item.attr('data-id', data.page_id);#}
+
+                            {#                    window.location = data.path;#}
+                            {#                },#}
+                            {#                error: function (xhr, status, err) {#}
+                            {#                    $item.remove();#}
+
+                            {#                    $spinnerContainer.addClass('d-none');#}
+
+                            {#                    clearInterval(spinnerInterval);#}
+                            {#                }#}
+                            {#            }).done(function () {#}
+                            {#                $spinnerContainer.addClass('d-none');#}
+
+                            {#                clearInterval(spinnerInterval);#}
+
+                            {#                _super($item, container);#}
+                            {#            });#}
+                            {#        }#}
+                            {#    });#}
+
+                            {#    $('.tree').sortable({#}
+                            {#        group: 'nested'#}
+                            {#    });#}
+                            // }
+
+                            let toolbar = new function() {
+                                this.defaults = {
+                                    createFromTreeUrl:       '{{ page_admin.generateUrl('create_from_tree') }}',
+                                    containerClass:          '.pagetree-sidebar',
+                                    spinnerClass:            '.spinner-container',
+                                    treeClass:               '.tree',
+                                    itemClass:               '.pagetree-toolbar-item',
+                                    nodeClass:               '.pagetree-node',
+                                    nodeLinkClass:           '.pagetree-node-link',
+                                    nodeLinkActiveClass:     '.pagetree-node-link--active',
+                                    nodeHoveredClass:        '.pagetree-node-hovered',
+                                    nodeHoveredPrependClass: '.pagetree-node-hovered--prepend',
+                                    nodeHoveredAppendClass:  '.pagetree-node-hovered--append',
+                                    draggedTargetClass:      '.pagetree-toolbar-dragged',
+                                    draggedTargetErrorClass: '.pagetree-toolbar-dragged--error',
+                                    draggedTargetOffset:     { left: 15, top: 15 },
+                                };
+
+                                this.elements = {
+                                    $node:          null,
+                                    $nodeLink:      null,
+                                    $spinner:       null,
+                                    $tree:          null,
+                                    $clickedTarget: null,
+                                    $hoveredTarget: null,
+                                };
+
+                                this.vars = {
+                                    selectedNodeClickCount: 0,
+                                    error:                  false,
+                                    dragging:               false,
+                                    prepend:                false, // TODO: rename to insertBefore
+                                    append:                 false, // TODO: rename to insertAfter
+                                    put:                    false, // TODO: rename to insertInside
+                                    timer:                  null,  // TODO: rename this to something appropriate
+                                    ajax:                   null
+                                };
+
+                                this.$dragged = null;
+
+                                this.$hovered = null;
+
+                                this.init = opts => {
+                                    this.opts = Object.assign({}, this.defaults, opts || {});
+
+                                    this._bindEvents();
+                                };
+
+                                this.mouseDown = e => {
+                                    if ($(e.currentTarget).hasClass(this.getClass(this.opts.itemClass))) {
+                                        e.preventDefault();
+
+                                        this.set('dragging', true);
+
+                                        this.elements.$tree          = $(this.opts.treeClass);
+                                        this.elements.$clickedTarget = this._createClickedTarget(e);
+                                    }
+                                };
+
+                                this.mouseMove = e => {
+                                    if (this.get('dragging')) {
+                                        e.preventDefault();
+
+                                        if (!this.$dragged) {
+                                            this.$dragged = this._createDraggedTarget(e);
+                                        }
+
+                                        this.setDraggedTargetError(!this.elements.$tree.is(':hover'));
+                                        this.setDraggedTargetPosition(e);
+
+                                        if (this.$hovered) {
+                                            const offset = this.$hovered.offset();
+
+                                            let top    = offset.top;
+                                            let bottom = offset.top + this.$hovered.outerHeight();
+
+                                            this.set('put', true);
+                                            this.set('prepend', false);
+                                            this.set('append', false);
+
+                                            this.$dragged.addClass('pagetree-toolbar-dragged--put');
+
+                                            this.$dragged
+                                                .addClass('pagetree-toolbar-dragged--put')
+                                                .removeClass('pagetree-toolbar-dragged--append')
+                                                .removeClass('pagetree-toolbar-dragged--prepend');
+
+                                            if (this.$hovered.hasClass(this.getClass(this.opts.treeClass))) {
+                                                this.$hovered
+                                                    .removeClass('tree--prepend')
+                                                    .removeClass('tree--append');
+
+                                                if (e.pageY >= top && e.pageY <= top + 5) {
+                                                    this.set('prepend', true);
+
+                                                    this.$dragged.addClass('pagetree-toolbar-dragged--prepend');
+
+                                                    this.$hovered.addClass('tree--prepend');
+                                                } else {
+                                                    this.$hovered.removeClass('tree--prepend');
+                                                }
+
+                                                if (e.pageY >= bottom - 5 && e.pageY <= bottom) {
+                                                    this.set('append', true);
+
+                                                    this.$dragged.addClass('pagetree-toolbar-dragged--append');
+
+                                                    this.$hovered.addClass('tree--append');
+                                                } else {
+                                                    this.$hovered.removeClass('tree--append');
+                                                }
+                                            } else {
+                                                if (e.pageY >= top && e.pageY <= top + 2) {
+                                                    this.set('prepend', true);
+
+                                                    this.$dragged.addClass('pagetree-toolbar-dragged--prepend')
+                                                        .removeClass('pagetree-toolbar-dragged--put');
+
+                                                    this.$hovered
+                                                        .addClass('pagetree-node-hovered--prepend');
+                                                } else {
+                                                    this.$hovered
+                                                        .removeClass('pagetree-node-hovered--prepend');
+                                                }
+
+                                                if (e.pageY >= bottom - 2 && e.pageY <= bottom) {
+                                                    this.set('append', true);
+
+                                                    this.$dragged.addClass('pagetree-toolbar-dragged--append')
+                                                        .removeClass('pagetree-toolbar-dragged--put');
+
+                                                    this.$hovered
+                                                        .addClass('pagetree-node-hovered--append');
+                                                } else {
+                                                    this.$hovered
+                                                        .removeClass('pagetree-node-hovered--append');
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+
+                                this.mouseUp = e => {
+                                    if (this.get('dragging')) {
+                                        e.preventDefault();
+
+                                        if (this.$hovered) {
+                                            this.$hovered
+                                                .removeClass(this.getClass(this.opts.nodeHoveredClass))
+                                                .removeClass(this.getClass(this.opts.nodeHoveredPrependClass))
+                                                .removeClass(this.getClass(this.opts.nodeHoveredAppendClass));
+                                        }
+
+                                        if (!this.get('error')) {
+                                            this.spinnerStart(this.opts.containerClass);
+
+                                            let data = {};
+
+                                            if (toolbar.$hovered && this.get('put')) {
+                                                data['parent_id'] = toolbar.$hovered.data('id');
+                                            }
+
+                                            $.ajax({
+                                                dataType: 'json',
+                                                url: this.opts.createFromTreeUrl,
+                                                method: 'POST',
+                                                data: data,
+                                                success: function (response) {
+                                                    toolbar.elements.$node = $(response.node);
+
+                                                    if (toolbar.get('put')) {
+                                                        $('.page-tree', toolbar.$hovered)
+                                                            .append(toolbar.elements.$node);
+
+                                                        toolbar.$hovered = null;
+
+                                                        toolbar.elements.$node.addClass('highlight');
+
+                                                        setTimeout(function() {
+                                                            toolbar.elements.$node.removeClass('highlight');
+                                                        }, 2200);
+
+                                                        toolbar.set('put', false);
+                                                    }
+                                                }
+                                            }).always(function() {
+                                                toolbar.spinnerStop(toolbar.opts.containerClass);
+                                            });
+                                        }
+
+                                        this.setDraggedTargetError(false);
+                                        this.set('dragging', false);
+
+                                        this.$dragged.remove();
+                                        this.$dragged = null;
+                                    }
+                                };
+
+                                this.mouseEnter = e => {
+                                    if (this.get('dragging')) {
+                                        const $target = $(e.currentTarget).closest(this.opts.nodeClass);
+
+                                        if ($target.length) {
+                                            this.$hovered = $target;
+                                            this.$hovered.addClass(this.opts.nodeHoveredClass.substring(1));
+                                        } else {
+                                            this.$hovered = this.elements.$tree;
+                                        }
+                                    }
+                                };
+
+                                this.mouseLeave = e => {
+                                    if (this.get('dragging')) {
+                                        if (!this.$hovered) {
+                                            return;
+                                        }
+
+                                        if (this.$hovered.is(this.elements.$tree)) {
+                                            this.$hovered
+                                                .removeClass('tree--prepend')
+                                                .removeClass('tree--append');
+                                        } else {
+                                            this.$hovered
+                                                .removeClass(this.getClass(this.opts.nodeHoveredClass))
+                                                .removeClass(this.getClass(this.opts.nodeHoveredClass))
+                                                .removeClass(this.getClass(this.opts.nodeHoveredPrependClass))
+                                                .removeClass(this.getClass(this.opts.nodeHoveredAppendClass));
+                                        }
+
+                                        this.$hovered = null;
+                                    }
+                                };
+
+                                this.mouseClick = e => {
+                                    e.preventDefault();
+
+                                    this.elements.$nodeLink = $(e.currentTarget);
+
+                                    this.increment('selectedNodeClickCount');
+
+                                    const self = this;
+                                    const $pageContent = $('.page-content');
+
+                                    if (!this.has('ajax') && !this.has('timer')) {
+                                        this.set('timer', setTimeout(() => {
+                                            self.spinnerStart('.page-content');
+
+                                            $(this.opts.nodeLinkActiveClass)
+                                                .removeClass(this.getClass(this.opts.nodeLinkActiveClass));
+
+                                            self.elements.$nodeLink.addClass('pagetree-node-link--active');
+
+                                            const url = self.elements.$nodeLink.attr('href');
+
+                                            self.set(
+                                                'ajax',
+                                                $.ajax({
+                                                    url: url,
+                                                    method: 'GET',
+                                                    success: response => {
+                                                        const $response = $(response);
+                                                        const title = $response.find('title').text();
+                                                        const content = $response.find('.page-content').html();
+
+                                                        window.history.pushState({}, title, url);
+
+                                                        $pageContent.html(content);
+                                                    },
+                                                    error: () => {
+                                                        window.location = url;
+                                                    }
+                                                }).always(() => {
+                                                    self.clear('timer');
+                                                    self.clear('ajax');
+
+                                                    self.reset('selectedNodeClickCount');
+
+                                                    self.elements.$nodeLink = null;
+
+                                                    self.spinnerStop('.page-content');
+                                                })
+                                            );
+                                        }, 250));
+                                    }
+
+                                    console.log(this.get('selectedNodeClickCount'));
+
+                                    if (this.get('selectedNodeClickCount') === 2) {
+                                        this.clear('timer');
+
+                                        if (this.has('ajax')) {
+                                            this.get('ajax').abort();
+
+                                            this.clear('ajax');
+                                        }
+
+                                        const $input = this.elements.$nodeLink.find('.pagetree-node-label').hide()
+                                            .next().removeClass('d-none');
+
+                                        const value  = $input.val();
+
+                                        $input.focus().val('').val(value);
+
+                                        this.set('selectedNodeClickCount', 0);
+
+                                        this.elements.$nodeLink = null;
+                                    }
+                                };
+
+                                this.nodeCollapse = e => {
+                                    e.stopPropagation();
+
+                                    const $target = $(e.currentTarget);
+                                    const $tree   = $target.parent().find('> .page-tree');
+
+                                    $target.parent().find('> .pagetree-node-collapse').toggleClass('d-none');
+
+                                    if ($tree.hasClass('collapse')) {
+                                        $tree.removeClass('collapse').hide().slideDown('fast');
+                                    } else {
+                                        $tree.slideUp('fast', function() {
+                                            $(this).addClass('collapse');
+                                        });
+                                    }
+                                };
+
+                                this._bindEvents = () => {
+                                    $('body')
+                                        .on('click', '.pagetree-node-collapse', this.nodeCollapse)
+                                        .on('mousedown', this.opts.itemClass, this.mouseDown)
+                                        .on('mousemove', this.mouseMove)
+                                        .on('mouseup', this.mouseUp)
+                                        .on('click', this.opts.nodeLinkClass, this.mouseClick)
+                                        .on('blur', '.pagetree-node .form-control', e => {
+                                            $(e.target).addClass('d-none').prev().show();
+                                        })
+                                        .on('mouseover', this.opts.nodeLinkClass, this.mouseEnter)
+                                        .on('mouseout', this.opts.nodeLinkClass, this.mouseLeave);
+                                };
+
+                                this._createClickedTarget = e => {
+                                    const $target = $(e.target);
+
+                                    if (!$target.hasClass(this.opts.itemClass.substring(1))) {
+                                        return $target.closest(this.opts.itemClass);
+                                    }
+
+                                    return $target;
+                                };
+
+                                this._createDraggedTarget = e => {
+                                    const html = this.elements.$clickedTarget.html() + ' ' +
+                                        this.elements.$clickedTarget.data('type');
+
+                                    return $('<div />')
+                                        .addClass(this.opts.draggedTargetClass.substring(1))
+                                        .addClass(this.opts.draggedTargetErrorClass.substring(1))
+                                        .css({'left': e.pageX, 'top': e.pageY })
+                                        .html(html)
+                                        .appendTo($('body'));
+                                };
+
+                                this.setDraggedTargetPosition = e => {
+                                    this.$dragged.css({
+                                        'left': e.pageX + this.opts.draggedTargetOffset.left,
+                                        'top': e.pageY + this.opts.draggedTargetOffset.top
+                                    });
+                                };
+
+                                this.spinnerStart = (containerClass) => {
+                                    $(containerClass).find(this.opts.spinnerClass).removeClass('d-none');
+                                };
+
+                                this.spinnerStop = (containerClass) => {
+                                    $(containerClass).find(this.opts.spinnerClass).addClass('d-none');
+                                };
+
+                                this.setDraggedTargetError = (isError) => {
+                                    this.set('error', isError);
+
+                                    if (isError) {
+                                        this.$dragged.addClass(this.getClass(this.opts.draggedTargetErrorClass));
+                                    } else {
+                                        this.$dragged.removeClass(this.getClass(this.opts.draggedTargetErrorClass));
+                                    }
+                                };
+
+                                this.has = name => {
+                                    return !!this.vars[name];
+                                };
+
+                                this.get = name => {
+                                    const value = name === 'selectedNodeClickCount' ? 0 : null;
+
+                                    if (this.vars.hasOwnProperty(name)) {
+                                        return this.vars[name];
+                                    }
+
+                                    return value;
+                                };
+
+                                this.set = (name, value) => {
+                                    this.vars[name] = value;
+
+                                    return this;
+                                };
+
+                                this.clear = name => {
+                                    if (name === 'timer') {
+                                        clearTimeout(this.vars[name]);
+                                    }
+
+                                    this.vars[name] = null;
+
+                                    return this;
+                                };
+
+                                this.increment = name => {
+                                    if (this.has(name)) {
+                                        this.set(name, this.get(name) + 1);
+                                    }
+
+                                    return this;
+                                };
+
+                                this.reset = name => {
+                                    this.vars[name] = 0;
+
+                                    return this;
+                                };
+
+                                this.getClass = selector => {
+                                    return selector.substring(1);
+                                };
+                            };
+
+                            toolbar.init();
+                        {%- endif -%}
+
+                        {#$('.select2bs4').each(function () {#}
+                        {#    let $hidden = $(this).closest('.collapse:not(.show)');#}
+
+                        {#    $hidden.addClass('show');#}
+
+                        {#    $(this).select2({#}
+                        {#        theme: 'bootstrap4',#}
+                        {#        width: 'style',#}
+                        {#        placeholder: '{{ 'admin.form.placeholder.label_select'|trans }}'#}
+                        {#    });#}
+
+                        {#    $hidden.removeClass('show');#}
+                        {#});#}
                     });
                 </script>
             {% endblock %}

@@ -21,6 +21,13 @@ class Menu
     private $id;
 
     /**
+     * @var string $name
+     *
+     * @ORM\Column(name="name", type="string")
+     */
+    private $name;
+
+    /**
      * @var ArrayCollection $pages
      *
      * @ORM\OneToMany(targetEntity="MenuItem", mappedBy="menu", cascade={"persist", "remove"})
@@ -40,6 +47,26 @@ class Menu
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return Menu
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -78,5 +105,7 @@ class Menu
     public function removeItem(MenuItem $item)
     {
         $this->items->removeElement($item);
+
+        $item->setMenu(null);
     }
 }

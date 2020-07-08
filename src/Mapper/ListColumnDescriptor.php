@@ -2,32 +2,40 @@
 
 namespace AdminBundle\Mapper;
 
+use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Utils\TranslationUtils;
 use Symfony\Component\Form\DataTransformerInterface;
 
 class ListColumnDescriptor
 {
     /**
-     * @var string
+     * @var AdminInterface $admin
+     */
+    private $admin;
+
+    /**
+     * @var string $propertyPath
      */
     private $propertyPath;
 
     /**
-     * @var array
+     * @var array $options
      */
     private $options;
 
     /**
-     * @var DataTransformerInterface
+     * @var DataTransformerInterface $dataTransformer
      */
     private $dataTransformer;
 
     /**
-     * @param string $propertyPath
-     * @param array  $options
+     * @param AdminInterface $admin
+     * @param string         $propertyPath
+     * @param array          $options
      */
-    public function __construct(string $propertyPath, array $options = [])
+    public function __construct(AdminInterface $admin, string $propertyPath, array $options = [])
     {
+        $this->admin        = $admin;
         $this->propertyPath = $propertyPath;
         $this->options      = $options;
     }
@@ -41,11 +49,15 @@ class ListColumnDescriptor
     }
 
     /**
-     * @return mixed|string
+     * @return string
      */
     public function getLabel()
     {
-        return $this->options['label'] ?? 'admin.list.label_' . TranslationUtils::getLabel($this->propertyPath);
+        return $this->options['label'] ?? sprintf(
+            'admin.list.%s.label_%s',
+            $this->admin->getName(),
+            TranslationUtils::camelCaseToSnakeCase($this->propertyPath)
+        );
     }
 
     /**

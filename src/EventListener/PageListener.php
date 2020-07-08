@@ -3,6 +3,7 @@
 namespace AdminBundle\EventListener;
 
 use AdminBundle\Entity\Page;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Transliterator;
 
@@ -24,24 +25,59 @@ final class PageListener
     /**
      * @param Page $entity
      */
+    public function prePersist(Page $entity)
+    {
+        $this->generateSlugAndPath($entity);
+    }
+
+    /**
+     * @param Page $entity
+     */
     public function preUpdate(Page $entity)
     {
-        $transliterator = Transliterator::create(
-            'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();'
-        );
+        $this->generateSlugAndPath($entity);
+    }
 
-        // TODO: maybe transliterator can handle that - investigate
-        // Remove unwanted characters
-        $slug = preg_replace('/[^a-zA-Z0-9\s]/', '', $transliterator->transliterate($entity->getTitle()));
-        // Replace more than one spaces with one
-        $slug = preg_replace('/\s+/', ' ', $slug);
-        // Replace multi-dash occurrences with single-dash
-        $slug = preg_replace('/-+/', '-', $slug);
+    /**
+     * @param Page $entity
+     */
+    private function generateSlugAndPath(Page $entity)
+    {
+        if ($entity->isHomePage()) {
+            $entity
+                ->setSlug('')
+                ->setPath('/')
+            ;
 
-        $entity->setSlug($slug);
+            return;
+        }
 
-        while ($parent = $entity->getParent()) {
-            $slug = $entity->getSlug() . '/' . $slug;
+        if ($entity->getIsManualSlug()) {
+            $slug = $entity->getSlug();
+        } else {
+            $transliterator = Transliterator::create(
+                'Any-Latin; Latin-ASCII; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();'
+            );
+
+            // TODO: maybe transliterator can handle that - investigate
+            // Remove unwanted characters
+            $slug = preg_replace('/[^a-zA-Z0-9\s]/', '', $transliterator->transliterate($entity->getTitle()));
+            // Replace more than one spaces with single-dash
+            $slug = preg_replace('/\s+?/', '-', $slug);
+            // Replace multi-dash occurrences with single-dash
+            $slug = preg_replace('/-+/', '-', $slug);
+
+            $entity->setSlug($slug);
+        }
+
+        $parent = $entity;
+
+        while ($parent = $parent->getParent()) {
+            if ($parent->isHomePage()) {
+                break;
+            }
+
+            $slug = $parent->getSlug() . '/' . $slug;
         }
 
         $path = ($this->defaultLocale === $entity->getLocale() ? '' : '/' . $entity->getLocale()) . '/' . $slug;

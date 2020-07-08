@@ -1,0 +1,102 @@
+{% extends '@Admin/CRUD/edit.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(function() {
+            const menuId = '{{ admin.subject.id }}';
+            const menuItemTypes = {
+                TYPE_PAGE: '{{ constant('AdminBundle\\Entity\\MenuItem::TYPE_PAGE') }}',
+                TYPE_URL: '{{ constant('AdminBundle\\Entity\\MenuItem::TYPE_URL') }}'
+            };
+
+            const $body = $('body');
+            // const $list = $('.collection');
+            // const sortableOptions = {
+            //     placeholder: 'sort-highlight',
+            //     handle: '.handle',
+            //     forcePlaceholderSize: true,
+            //     zIndex: 999999,
+            //     stop: function (e, data) {
+            //         let priority = 1;
+            //
+            //         $(data.item).closest('.collection').find('.js-menu-item-priority').each(function() {
+            //             $(this).val(priority);
+            //
+            //             priority++;
+            //         });
+            //     }
+            // };
+            //
+            // $list.sortable(sortableOptions);
+
+            $body.on('click', '.js-collection-item-add', e => {
+                let $target = $(e.target);
+
+                if (!$target.hasClass('.js-collection-item-add')) {
+                    $target = $target.closest('.js-collection-item-add');
+                }
+
+                const id    = '#' + $target.data('list');
+                const $list = $('body').find(id);
+
+                let priority = 0;
+                let counter  = $list.data('counter') || $list.children().length;
+
+                $list.find('.js-menu-item-priority').each(function() {
+                    priority = Math.max(priority, $(this).val());
+                });
+
+                counter++;
+                const $item = $($list.data('prototype').replace(/__name__/g, counter));
+
+                priority++;
+                $item.find('.js-menu-item-priority').val(priority);
+
+                $item.find('.js-menu-item-menu').val(menuId);
+
+                $list.find('> .js-collection-item-empty').removeClass('d-flex').addClass('d-none');
+
+                $list.attr('data-counter', counter).append($item);
+
+                /* global feather */
+                feather.replace();
+
+                // $list.sortable(sortableOptions);
+
+                {#$item.find('.select2bs4').select2({#}
+                {#    theme: 'bootstrap4',#}
+                {#    width: 'style',#}
+                {#    placeholder: '{{ 'admin.form.placeholder.label_select'|trans }}'#}
+                {#});#}
+            });
+
+            $body.on('click', '.js-collection-item-delete', e => {
+                const $target   = $(e.target);
+                const $list     = $target.closest('.collection');
+
+                $target.closest('li').remove();
+
+                if ($list.find('li').length === 1) {
+                    $list.find('> .js-collection-item-empty').removeClass('d-none').addClass('d-flex');
+                }
+            });
+
+            $body.on('change', '.js-menu-item-type', e => {
+                const $target = $(e.target);
+                const value   = $target.val();
+                const isPage  = value === menuItemTypes.TYPE_PAGE;
+                const isUrl   = value === menuItemTypes.TYPE_URL;
+
+                const $page = $target.closest('li').find('.js-menu-item-page');
+                $page[isPage ? 'show' : 'hide']();
+                $page.find('.form-control')[isPage ? 'attr' : 'removeAttr']('required');
+
+                const $url = $target.closest('li').find('.js-menu-item-url');
+                $url[isUrl ? 'show' : 'hide']();
+                $url.find('.form-control')[isUrl ? 'attr' : 'removeAttr']('required');
+            });
+        });
+    </script>
+{% endblock %}

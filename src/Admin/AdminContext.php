@@ -5,19 +5,37 @@ namespace AdminBundle\Admin;
 use AdminBundle\Collection\ArrayCollection;
 use AdminBundle\Filter\Filter;
 use AdminBundle\Mapper\FilterMapper;
+use AdminBundle\Mapper\FormMapper;
 use AdminBundle\Mapper\ListColumnDescriptor;
 use AdminBundle\Mapper\ListMapper;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-class Page
+class AdminContext
 {
+    /**
+     * @var AdminInterface
+     */
+    private $admin;
+
     /**
      * @var ListColumnDescriptor[]
      */
     private $list;
+
+    /**
+     * @var FormInterface|null
+     */
+    protected $form;
+
+    /**
+     * @var string
+     */
+    protected $formTheme;
 
     /**
      * @var FormBuilderInterface
@@ -45,15 +63,21 @@ class Page
     private $formTabs;
 
     /**
+     * @var bool
+     */
+    protected $showPageSidebar = false;
+
+    /**
      * @param AdminInterface $admin
-     * @param array          $filters
      *
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function __construct(AdminInterface $admin, array $filters)
+    public function __construct(AdminInterface $admin)
     {
-        if ($admin->isAction('list')) {
+        $this->admin = $admin;
+
+        if ($admin->isRoute('list')) {
             $alias = ($qb = $admin->createQuery())->getRootAliases()[0];
 
             $admin->configureListFields($listMapper = new ListMapper($admin, $qb, $alias));
@@ -63,14 +87,81 @@ class Page
             $this->resultCount = $qb->select($qb->expr()->count($alias))->getQuery()->getSingleScalarResult();
 
             if ($this->hasResults()) {
-                $admin->configureFilters($filterMapper = new FilterMapper($admin, $qb, $alias, $filters));
+                $filters      = $admin->getRequest()->get('filter', []);
+                $filterMapper = new FilterMapper($admin, $qb, $alias, $filters);
+
+                $admin->configureFilters($filterMapper);
 
                 $this->filters           = $filters;
                 $this->filterFormBuilder = $filterMapper->getFormBuilder();
             }
         }
 
-        $this->formTabs = new ArrayCollection();
+        $this->formTabs  = new ArrayCollection();
+        $this->formTheme = '@Admin/form_fields.html.twig';
+    }
+    
+    /**
+     * @return FormInterface|null
+     */
+    public function getForm()
+    {
+        return $this->buildForm();
+    }
+
+    /**
+     * @return FormInterface|null
+     */
+    public function buildForm()
+    {
+        if (!$this->form) {
+            $this->form = $this->getFormBuilder()->getForm();
+        }
+
+        return $this->form;
+    }
+
+    /**
+     * @param FormBuilderInterface $builder
+     */
+    public function configureFormBuilder(FormBuilderInterface $builder)
+    {
+        $this->admin->configureFormFields(new FormMapper($this->admin, $builder));
+    }
+
+    /**
+     * @return FormBuilderInterface
+     */
+    public function getFormBuilder()
+    {
+        $formBuilder = $this->admin->getFormFactory()->createNamedBuilder(
+            $this->admin->getName(),
+            FormType::class,
+            null,
+            [
+                'data_class' => $this->admin->getClass(),
+            ]
+        );
+
+        $this->configureFormBuilder($formBuilder);
+
+        return $formBuilder;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormTheme()
+    {
+        return $this->formTheme;
+    }
+
+    /**
+     * @param string $formTheme
+     */
+    public function setFormTheme(string $formTheme)
+    {
+        $this->formTheme = $formTheme;
     }
 
     /**
@@ -143,5 +234,25 @@ class Page
     public function getFormTabs()
     {
         return $this->formTabs;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isShowPageSidebar()
+    {
+        return $this->showPageSidebar;
+    }
+
+    /**
+     * @param bool $showPageSidebar
+     *
+     * @return AdminContext
+     */
+    public function setShowPageSidebar($showPageSidebar)
+    {
+        $this->showPageSidebar = $showPageSidebar;
+
+        return $this;
     }
 }

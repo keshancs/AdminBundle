@@ -8,22 +8,22 @@ use Doctrine\ORM\QueryBuilder;
 class ListMapper
 {
     /**
-     * @var AdminInterface
+     * @var AdminInterface $admin
      */
     private $admin;
 
     /**
-     * @var QueryBuilder
+     * @var QueryBuilder $qb
      */
     private $qb;
 
     /**
-     * @var string
+     * @var string $alias
      */
     private $alias;
 
     /**
-     * @var array
+     * @var array $list
      */
     private $list = [];
 
@@ -35,7 +35,7 @@ class ListMapper
     public function __construct(AdminInterface $admin, QueryBuilder $qb, string $alias)
     {
         $this->admin = $admin;
-        $this->qb    = $qb/*->resetDQLPart('select')*/;
+        $this->qb    = $qb;
         $this->alias = $alias;
     }
 
@@ -47,9 +47,7 @@ class ListMapper
      */
     public function add(string $propertyPath, array $options = [])
     {
-        $this->list[$propertyPath] = new ListColumnDescriptor($propertyPath, $options);
-
-        /*$this->qb->addSelect(sprintf('%s.%s', $this->alias, $propertyPath));*/
+        $this->list[$propertyPath] = new ListColumnDescriptor($this->admin, $propertyPath, $options);
 
         return $this;
     }

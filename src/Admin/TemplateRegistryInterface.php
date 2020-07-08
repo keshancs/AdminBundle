@@ -14,6 +14,8 @@ interface TemplateRegistryInterface
     /**
      * @param string $name
      * @param string $path
+     *
+     * @return $this
      */
     public function setTemplate(string $name, string $path);
 }

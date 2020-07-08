@@ -1,47 +1,41 @@
 {% extends '@Admin/CRUD/layout.html.twig' %}
 
-{% form_theme form '@Admin/form_fields.html.twig' %}
-
 {% block breadcrumbs %}{% endblock %}
 
-{% block content %}
-    {% form_theme form admin.formTheme %}
+{%- block content -%}
+    <div class="container-fluid pb-3">
+        {% form_theme form admin.context.formTheme %}
 
-    {{ form_start(form) }}
-        <div class="card card-primary card-outline card-tabs">
-            {% if not admin.page.formTabs.empty %}
-                <div class="card-header p-0 pt-1 border-bottom-0">
-                    <ul class="nav nav-tabs" id="form-tab" role="tablist">
-                        {% for tab in admin.page.formTabs|keys %}
-                            <li class="nav-item">
-                                <a class="nav-link{% if loop.first %} active{% endif %}" id="{{ tab }}-tab" data-toggle="pill" href="#{{ tab }}" role="tab" aria-controls="{{ tab }}" aria-selected="true">
-                                    {{ ('admin.form.tabs.label_' ~ tab)|trans }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-            <div class="card-body">
-                {% if not admin.page.formTabs.empty %}
-                    <div class="tab-content" id="form-tabContent">
-                        {% for tab, fields in admin.page.formTabs %}
-                            <div class="tab-pane fade show{% if loop.first %} active{% endif %}" id="{{ tab }}" role="tabpanel" aria-labelledby="{{ tab }}-tab">
-                                {% for field in fields %}
-                                    {{ form_row(form[field]) }}
-                                {% endfor %}
-                            </div>
+        {{- form_start(form) -}}
+
+        {%- if not admin.context.formTabs.empty -%}
+            <ul class="nav nav-tabs" id="form-tab" role="tablist">
+                {% for tab in admin.context.formTabs|keys %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if loop.first %} active{% endif %}" id="{{ tab }}-tab" data-toggle="pill" href="#{{ tab }}" role="tab" aria-controls="{{ tab }}" aria-selected="true">
+                            {{ ('admin.form.tabs.label_' ~ tab)|trans }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="tab-content" id="form-tabContent">
+                {% for tab, fields in admin.context.formTabs %}
+                    <div class="tab-pane pt-2 fade show{% if loop.first %} active{% endif %}" id="{{ tab }}" role="tabpanel" aria-labelledby="{{ tab }}-tab">
+                        {% for field in fields %}
+                            {{ form_row(form[field]) }}
                         {% endfor %}
                     </div>
-                {% endif %}
-                {{ form_rest(form) }}
+                {% endfor %}
             </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-danger mr-3" type="submit">{{ 'admin.form.button.label_cancel'|trans }}</button>
-                    <button class="btn btn-default" type="submit">{{ 'admin.form.button.label_save_changes'|trans }}</button>
-                </div>
-            </div>
+        {%- endif -%}
+
+        {{- form_rest(form) -}}
+
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-danger mr-3" type="submit">{{ 'admin.form.button.label_cancel'|trans }}</button>
+            <button class="btn btn-default" type="submit">{{ 'admin.form.button.label_save_changes'|trans }}</button>
         </div>
-    {{ form_end(form) }}
-{% endblock %}
+
+        {{- form_end(form) -}}
+    </div>
+{%- endblock -%}

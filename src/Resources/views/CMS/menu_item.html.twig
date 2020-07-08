@@ -1,0 +1,23 @@
+{%- set level     = level|default(1)  %}
+{%- set has_items = item.items|length > 0 -%}
+{%- set page      = item.page -%}
+{%- set active    = page and (page.id in current_page.hierarchy or page.id == current_page.id) -%}
+
+{%- if page.locale == 'lv' -%}
+    {%- set page   = page.translation(locale)|default(page) -%}
+    {%- set active = page and (page.id in current_page.hierarchy or page.id == current_page.id) -%}
+{%- endif -%}
+
+<li class="{% if level == 1 %}nav-item{% if has_items %} dropdown{% endif %}{% elseif has_items %} dropdown-submenu{% endif %}">
+    <a class="{% if level == 1 %}nav-link{% if has_items %} dropdown-toggle{% endif %}{% else %}dropdown-item{% endif%}{% if active %} active{% endif %}" href="{{ page.path }}"{% if has_items %} id="dropdown{{ item.id }}" role="button" aria-haspopup="true" aria-expanded="false"{% endif %}>
+        {{- page.menuTitle|default(page.title) -}}{% if active %}  <span class="sr-only">(current)</span>{% endif %}
+    </a>
+
+    {%- if has_items -%}
+        <ul class="dropdown-menu" aria-labelledby="dropdown{{ item.id }}">
+            {% for child in item.items %}
+                {%- include '@Admin/CMS/menu_item.html.twig' with { item: child, level: level + 1 } -%}
+            {% endfor %}
+        </ul>
+    {%- endif -%}
+</li>

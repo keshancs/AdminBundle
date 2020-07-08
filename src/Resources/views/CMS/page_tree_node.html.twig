@@ -1,0 +1,28 @@
+{%- set page_id    = app.request.get('id') -%}
+{%- set page_admin = admin_pool().getAdminByAdminCode('admin.page') -%}
+{%- set active     = app.request.get('_route') == page_admin.routeName('edit') and page_id == page.id -%}
+
+<li class="pagetree-node" data-id="{{ page.id }}">
+    {%- if page.children|length > 0 -%}
+        <span class="pagetree-node-collapse" data-feather="plus-circle"></span>
+        <span class="pagetree-node-collapse d-none" data-feather="minus-circle"></span>
+    {%- endif -%}
+    <a href="{{ admin_path('edit', page_admin.code, { id: page.id }) }}" class="pagetree-node-link text-decoration-none{% if active %} pagetree-node-link--active{% endif %}">
+        <div class="pagetree-node-icon">
+            {%- if page.homePage -%}
+                <span data-feather="globe" style="fill: #fff; color: #999;"></span>
+            {%- else -%}
+                <span data-feather="file" style="fill: #fff; color: #999;"></span>
+            {%- endif -%}
+        </div>
+        <div class="d-flex">
+            <span class="pagetree-node-label">{{ page }}</span>
+            <input type="text" class="form-control d-none" value="{{ page }}" />
+        </div>
+    </a>
+    <ul class="page-tree collapse">
+        {% for child in page.children %}
+            {% include '@Admin/CMS/page_tree_node.html.twig' with { page: child } %}
+        {% endfor %}
+    </ul>
+</li>

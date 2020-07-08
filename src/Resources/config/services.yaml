@@ -1,7 +1,12 @@
 services:
     AdminBundle\Controller\:
         resource: '../../Controller'
-        tags: ['controller.service_arguments']
+        tags:
+            - { name: controller.service_arguments }
+        bind:
+            $router:         '@router'
+            $routeLoader:    '@admin.route_loader'
+            $packageManager: '@assets.packages'
 
     admin.security.login_form_authenticator:
         public: true
@@ -24,14 +29,15 @@ services:
         tags:
             - { name: routing.loader }
 
-    admin.router:
-        decorates: 'router.default'
-        class: AdminBundle\Routing\Router
-        arguments:
-            - "@admin.router.inner"
-            - "@service_container"
-            - "@doctrine.orm.entity_manager"
-            - "@request_stack"
+#    admin.router:
+#        public: true
+#        decorates: 'router.default'
+#        class: AdminBundle\Routing\Router
+#        arguments:
+#            - "@admin.router.inner"
+#            - "@service_container"
+#            - "@doctrine.orm.entity_manager"
+#            - "@request_stack"
 
     admin.service_listener:
         class: AdminBundle\EventListener\AdminServiceListener
@@ -44,12 +50,13 @@ services:
         public: true
         class: AdminBundle\Twig\AdminExtension
         arguments:
-            - "@router"
+            - "@request_stack"
             - "@admin.route_loader"
             - "@admin.pool"
             - "@parameter_bag"
             - "@twig"
             - "@property_accessor"
+            - "@doctrine.orm.entity_manager"
             - "@admin.setting_manager"
         tags:
             - { name: twig.extension }
@@ -81,6 +88,9 @@ services:
             - AdminBundle\Entity\Page
         tags:
             - { name: admin }
+        calls:
+            - [setTemplate, ["edit", "@@Admin/CRUD/page_edit.html.twig"]]
+            - [setFormTheme, ["@@Admin/CRUD/page_fields.html.twig"]]
 
     admin.menu:
         public: true
@@ -90,6 +100,8 @@ services:
             - AdminBundle\Entity\Menu
         tags:
             - { name: admin }
+        calls:
+            - [setTemplate, ["edit", "@@Admin/CRUD/menu_edit.html.twig"]]
 
     admin.setting:
         public: true
@@ -106,4 +118,5 @@ services:
         arguments:
             - "%kernel.default_locale%"
         tags:
+            - { name: doctrine.orm.entity_listener, event: prePersist }
             - { name: doctrine.orm.entity_listener, event: preUpdate }

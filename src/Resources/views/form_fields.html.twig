@@ -1,5 +1,78 @@
 {% extends 'form_div_layout.html.twig' %}
 
+{% block collection_widget %}
+    {% if prototype is defined %}
+        {%- set attr = attr|merge({'data-prototype': block('collection_entry_row_prototype') }) -%}
+    {% endif %}
+    {% set column_count = prototype|length + (form.vars.allow_delete ? 1 : 0) %}
+    <ul {{ block('widget_container_attributes') }}>
+        {{- block('collection_entry_rows') -}}
+    </ul>
+    {% if form.vars.allow_add|default(false) %}
+        <div class="d-flex justify-content-end pt-2">
+            <a href="javascript:void(0);" class="btn btn-light js-collection-item-add" data-list="{{ form.vars.id }}">
+                <span data-feather="plus"></span>
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block collection_entry_rows %}
+    {% set rootform = form %}
+    {% if form|length %}
+        {% for form in rootform %}
+            {{- block('collection_entry_row') -}}
+        {% endfor %}
+    {% else %}
+        <li class="d-flex bg-white border p-3 align-items-center justify-content-center js-collection-item-empty">
+            <span class="text-muted font-italic">No items found</span>
+        </li>
+    {% endif %}
+{% endblock %}
+
+{%- block collection_entry_row -%}
+    <li class="list-group-item">
+        <div class="d-flex align-items-stretch">
+            <div class="d-flex align-items-center justify-content-center mr-2">
+                <span class="handle">
+                    <span data-feather="more-horizontal"></span>
+                </span>
+            </div>
+            <div class="flex-fill">
+                <div class="form-group d-flex bg-white align-items-stretch">
+                    {% for child in form|filter(child => not child.rendered and 'hidden' not in child.vars.block_prefixes and 'collection' not in child.vars.block_prefixes) %}
+                        {{- form_row(child) -}}
+                    {% endfor %}
+                    {% if form.parent.vars.allow_delete|default(false) %}
+                        <div class="d-flex align-items-end">
+                            <a href="javascript:void(0);" class="btn btn-danger js-collection-item-delete">
+                                <span data-feather="trash"></span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% set collections = form|filter(child => not child.rendered and 'collection' in child.vars.block_prefixes) %}
+                {% if collections|length %}
+                    {% for child in collections %}
+                        <div class="form-group bg-white">
+                            {{- form_label(child) -}}
+                            {{- form_widget(child) -}}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div style="display: none">
+            {{- form_rest(form) -}}
+        </div>
+    </li>
+{%- endblock -%}
+
+{%- block collection_entry_row_prototype -%}
+    {%- set form = prototype -%}
+    {{- block('collection_entry_row') -}}
+{%- endblock -%} 
+
 {%- block form_widget_simple -%}
     {%- set type = type|default('text') -%}
     {%- if type == 'range' or type == 'color' -%}
@@ -8,6 +81,34 @@
     <div class="flex-fill">
         <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     </div>
+{%- endblock -%}
+
+{%- block form_row -%}
+    {%- if 'text' in form.vars.block_prefixes -%}
+        {%- set row_attr = row_attr|merge({ class: row_attr.class|default('form-group') }) -%}
+    {%- endif -%}
+    {{ parent() }}
+{%- endblock -%}
+
+{%- block form_help -%}
+    {%- if help is not empty -%}
+        {%- set help_attr = help_attr|merge({ class: help_attr.class|default('form-text text-muted')|trim }) -%}
+        <small id="{{ id }}_help"{% with { attr: help_attr } %}{{ block('attributes') }}{% endwith %}>
+            {%- if translation_domain is same as(false) -%}
+                {%- if help_html is same as(false) -%}
+                    {{- help -}}
+                {%- else -%}
+                    {{- help|raw -}}
+                {%- endif -%}
+            {%- else -%}
+                {%- if help_html is same as(false) -%}
+                    {{- help|trans(help_translation_parameters, translation_domain) -}}
+                {%- else -%}
+                    {{- help|trans(help_translation_parameters, translation_domain)|raw -}}
+                {%- endif -%}
+            {%- endif -%}
+        </small>
+    {%- endif -%}
 {%- endblock -%}
 
 {%- block choice_widget_collapsed -%}
@@ -20,4 +121,16 @@
     <div class="flex-fill">
         <div class="form-control-static">{{ value }}</div>
     </div>
+{%- endblock -%}
+
+{%- block checkbox_row -%}
+    <div{% with { attr: row_attr|merge({ class: 'form-group form-check' }) } %}{{ block('attributes') }}{% endwith %}>
+        {{- form_widget(form) -}}
+        {{- form_label(form) -}}
+    </div>
+{%- endblock -%}
+
+{%- block checkbox_widget -%}
+    {%- set attr = attr|merge({ class: 'form-check-input' }) -%}
+    {{ parent() }}
 {%- endblock -%}

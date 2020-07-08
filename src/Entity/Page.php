@@ -24,10 +24,18 @@ class Page
     /**
      * @var Page|null $parent
      *
-     * @ORM\ManyToOne(targetEntity="Page")
+     * @ORM\ManyToOne(targetEntity="Page", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="page_id", nullable=true)
      */
     private $parent;
+
+    /**
+     * @var Page|null $parent
+     *
+     * @ORM\OneToMany(targetEntity="Page", mappedBy="parent")
+     * @ORM\JoinColumn(referencedColumnName="page_id")
+     */
+    private $children;
 
     /**
      * @var Page|null $translation
@@ -60,11 +68,25 @@ class Page
     private $title;
 
     /**
+     * @var string $menuTitle
+     *
+     * @ORM\Column(name="menu_title", type="string", nullable=true)
+     */
+    private $menuTitle;
+
+    /**
      * @var string $slug
      *
      * @ORM\Column(name="slug", type="string")
      */
     private $slug;
+
+    /**
+     * @var string $isManualSlug
+     *
+     * @ORM\Column(name="is_manual_slug", type="boolean")
+     */
+    private $isManualSlug;
 
     /**
      * @var string $path
@@ -101,9 +123,26 @@ class Page
      */
     private $isHomePage;
 
+    /**
+     * @var int $priority
+     *
+     * @ORM\Column(name="priority", type="string", nullable=true)
+     */
+    private $priority;
+
+    /**
+     * @var array $hierarchy
+     *
+     * @ORM\Column(name="hierarchy", type="json")
+     */
+    private $hierarchy;
+
     public function __construct()
     {
+        $this->isManualSlug = false;
+        $this->children     = new ArrayCollection();
         $this->translations = new ArrayCollection();
+        $this->hierarchy    = [];
     }
 
     /**
@@ -130,6 +169,35 @@ class Page
     public function setParent($parent)
     {
         $this->parent = $parent;
+
+        // TODO: move into separate method
+        if ($parent) {
+            while ($parent) {
+                array_unshift($this->hierarchy, $parent->getId());
+
+                $parent = $parent->getParent();
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Page|null
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param Page|null $children
+     *
+     * @return Page
+     */
+    public function setChildren($children)
+    {
+        $this->children = $children;
 
         return $this;
     }
@@ -229,6 +297,26 @@ class Page
     /**
      * @return string
      */
+    public function getMenuTitle()
+    {
+        return $this->menuTitle;
+    }
+
+    /**
+     * @param string $menuTitle
+     *
+     * @return Page
+     */
+    public function setMenuTitle($menuTitle)
+    {
+        $this->menuTitle = $menuTitle;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getSlug()
     {
         return $this->slug;
@@ -239,9 +327,29 @@ class Page
      *
      * @return Page
      */
-    public function setSlug(string $slug)
+    public function setSlug($slug)
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIsManualSlug()
+    {
+        return $this->isManualSlug;
+    }
+
+    /**
+     * @param string $isManualSlug
+     *
+     * @return Page
+     */
+    public function setIsManualSlug($isManualSlug)
+    {
+        $this->isManualSlug = $isManualSlug;
 
         return $this;
     }
@@ -259,7 +367,7 @@ class Page
      *
      * @return Page
      */
-    public function setPath(string $path)
+    public function setPath($path)
     {
         $this->path = $path;
 
@@ -347,11 +455,59 @@ class Page
     }
 
     /**
+     * @return int
+     */
+    public function getPriority()
+    {
+        return $this->priority;
+    }
+
+    /**
+     * @param int $priority
+     *
+     * @return Page
+     */
+    public function setPriority($priority)
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHierarchy()
+    {
+        return $this->hierarchy;
+    }
+
+    /**
+     * @param array $hierarchy
+     *
+     * @return Page
+     */
+    public function setHierarchy($hierarchy)
+    {
+        $this->hierarchy = $hierarchy;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCollectionTitle()
+    {
+        return $this->menuTitle ?: $this->title;
+    }
+
+    /**
      * @return string
      */
     public function __toString()
     {
-        return sprintf('%s [%d]', $this->seoTitle ?? $this->title, $this->id);
+        return $this->seoTitle ?? $this->title;
     }
 
     /**

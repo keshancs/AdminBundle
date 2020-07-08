@@ -1,0 +1,19 @@
+{% set locale       = app.request.get('_locale') %}
+{% set current_page = app.request.get('_page') %}
+
+<nav class="navbar navbar-expand-lg sticky-top navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ cms_page_url({ id: 1 }) }}">SIA OROLS</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+            <ul class="navbar-nav mr-auto">
+                {%- for item in items -%}
+                    {%- include '@Admin/CMS/menu_item.html.twig' -%}
+                {%- endfor -%}
+            </ul>
+            {{- render_locale_selector_element() -}}
+        </div>
+    </div>
+</nav>
