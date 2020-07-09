@@ -5,8 +5,7 @@ namespace AdminBundle\Admin;
 use AdminBundle\Mapper\FilterMapper;
 use AdminBundle\Mapper\FormMapper;
 use AdminBundle\Mapper\ListMapper;
-use AdminBundle\Mapper\RouteMapper;
-use AdminBundle\Routing\RouteLoader;
+use AdminBundle\Routing\Router;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
@@ -125,9 +124,9 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
     public function configureFilters(FilterMapper $filterMapper);
 
     /**
-     * @param RouteLoader $routeLoader
+     * @param Router $router
      */
-    public function configureRoutes(RouteLoader $routeLoader);
+    public function configureRoutes(Router $router);
 
     /**
      * @param string $name

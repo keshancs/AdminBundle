@@ -6,6 +6,7 @@ use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CmsController;
 use AdminBundle\Controller\SecurityController;
 use AdminBundle\Entity\Page;
+use AdminBundle\Utils\TranslationUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Loader\Loader;
@@ -114,11 +115,7 @@ final class Router extends Loader implements RouterInterface
      */
     public function getRouteCollection()
     {
-        if (false === $this->loaded) {
-            $this->routeCollection = $this->loadRouteCollection();
-        }
-
-        return $this->routeCollection;
+        return $this->loaded ? $this->routeCollection : $this->loadRouteCollection();
     }
 
     /**
@@ -163,18 +160,6 @@ final class Router extends Loader implements RouterInterface
     }
 
     /**
-     * @return UrlGenerator|UrlGeneratorInterface
-     */
-    public function getGenerator()
-    {
-        if (null == $this->urlGenerator) {
-            $this->urlGenerator = new UrlGenerator($this->getRouteCollection(), $this->context, $this->logger);
-        }
-
-        return $this->urlGenerator;
-    }
-
-    /**
      * @param string $name
      *
      * @return string
@@ -195,11 +180,65 @@ final class Router extends Loader implements RouterInterface
     }
 
     /**
+     * @param string      $name
+     * @param string      $path
+     * @param array       $defaults
+     * @param array       $requirements
+     * @param array       $options
+     * @param string|null $host
+     * @param array       $schemes
+     * @param array       $methods
+     * @param string|null $condition
+     *
+     * @return Router
+     */
+    public function add(
+        string $name,
+        string $path,
+        array $defaults = [],
+        array $requirements = [],
+        array $options = [],
+        ?string $host = '',
+        $schemes = [],
+        $methods = [],
+        ?string $condition = ''
+    ) {
+        if ($admin = $this->context->getParameter('_admin')) {
+            $actionName = TranslationUtils::snakeCaseToCamelCase($name);
+            $path       = $admin->getRoutePath($path);
+            $name       = $admin->getRouteName($name);
+
+            $defaults['_admin']      = $admin->getCode();
+            $defaults['_controller'] = $defaults['_controller'] ??
+                ($admin->getController() ?: CmsController::class) . '::' . $actionName;
+
+            $this->routeCollection->add(
+                $name,
+                new Route($path, $defaults, $requirements, $options, $host, $schemes, $methods, $condition)
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return UrlGenerator|UrlGeneratorInterface
+     */
+    private function getGenerator()
+    {
+        if (null == $this->urlGenerator) {
+            $this->urlGenerator = new UrlGenerator($this->getRouteCollection(), $this->context, $this->logger);
+        }
+
+        return $this->urlGenerator;
+    }
+
+    /**
      * @return RouteCollection
      */
     private function loadRouteCollection()
     {
-        $routeCollection = new RouteCollection();
+        $this->routeCollection = new RouteCollection();
 
         foreach ($this->routes as $name => $route) {
             list ($controller, $action) = $route['controller'];
@@ -208,19 +247,34 @@ final class Router extends Loader implements RouterInterface
             $path     = '/' . $this->routePrefix . rtrim($route['path'], '/');
             $defaults = ['_controller' => $controller . '::' . $action];
 
-            $routeCollection->add($name, new Route($path, $defaults));
+            $this->routeCollection->add($name, new Route($path, $defaults));
         }
 
-        foreach ($this->pool->getServices() as $code => $admin) {
-            $name       = $admin->getRouteName('list');
-            $path       = $admin->getRoutePath('list');
-            $defaults   = ['_controller' => ($admin->getController() ?: CmsController::class) . '::list'];
+        $routes = [
+            'list'      => ['list', []],
+            'create'    => ['create', []],
+            'edit'      => ['{id}/edit', ['id' => '\d+']],
+            'update'    => ['{id}/update', ['id' => '\d+']],
+            'translate' => ['{id}/translate', ['id' => '\d+']],
+            'delete'    => ['{id}/delete', ['id' => '\d+']],
+        ];
 
-            $routeCollection->add($name, new Route($path, $defaults));
+        foreach ($this->pool->getServices() as $code => $admin) {
+            $this->context->setParameter('_admin', $admin);
+
+            foreach ($routes as $name => $route) {
+                list($path, $requirements) = $route;
+
+                $this->add($name, $path, [], $requirements);
+            }
+
+            $admin->configureRoutes($this);
+
+            $this->context->setParameter('_admin', null);
         }
 
         $this->loaded = true;
 
-        return $routeCollection;
+        return $this->routeCollection;
     }
 }

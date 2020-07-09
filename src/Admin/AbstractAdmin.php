@@ -492,7 +492,7 @@ abstract class AbstractAdmin implements AdminInterface
     /**
      * @inheritDoc
      */
-    public function configureRoutes(RouteLoader $routeLoader)
+    public function configureRoutes(Router $router)
     {
     }
 }

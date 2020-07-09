@@ -6,8 +6,7 @@ use AdminBundle\Controller\PageController;
 use AdminBundle\Entity\Page;
 use AdminBundle\Mapper\FormMapper;
 use AdminBundle\Mapper\ListMapper;
-use AdminBundle\Mapper\RouteMapper;
-use AdminBundle\Routing\RouteLoader;
+use AdminBundle\Routing\Router;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -154,11 +153,11 @@ class PageAdmin extends AbstractAdmin
     }
 
     /**
-     * @param RouteLoader $routeLoader
+     * @param Router $router
      */
-    public function configureRoutes(RouteLoader $routeLoader)
+    public function configureRoutes(Router $router)
     {
-        $routeLoader
+        $router
             ->add(
                 'create_from_tree',
                 'create_from_tree',
