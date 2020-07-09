@@ -1,11 +1,14 @@
 {%- set admin_code = app.request.get('_admin', null) %}
+{%- set title      = 'admin.' ~ app.request.get('_action') ~ '.' -%}
 {%- if admin_code -%}
     {%- set admin = admin_pool().getAdminByAdminCode(admin_code) -%}
+    {%- set title = title ~ admin.name ~ '.' -%}
 {%- endif -%}
+{%- set title = title ~ 'label_page_title' -%}
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{% block title %}Admin{% endblock %}</title>
+        <title>{% block title %}{{ title|trans }}{% endblock %}</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />

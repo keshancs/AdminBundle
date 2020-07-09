@@ -56,28 +56,6 @@ final class Router extends Loader implements RouterInterface
     private $routePrefix = 'admin';
 
     /**
-     * @var string[]
-     */
-    private $routes = [
-        'index' => [
-            'path'       => '/',
-            'controller' => [CmsController::class, 'index'],
-        ],
-        'dashboard' => [
-            'path'       => '/dashboard',
-            'controller' => [CmsController::class, 'dashboard'],
-        ],
-        'login' => [
-            'path'       => '/login',
-            'controller' => [SecurityController::class, 'login'],
-        ],
-        'logout' => [
-            'path'       => '/logout',
-            'controller' => [SecurityController::class, 'logout'],
-        ],
-    ];
-
-    /**
      * @var bool
      */
     private $loaded = false;
@@ -209,14 +187,18 @@ final class Router extends Loader implements RouterInterface
             $name       = $admin->getRouteName($name);
 
             $defaults['_admin']      = $admin->getCode();
+            $defaults['_action']     = $actionName;
             $defaults['_controller'] = $defaults['_controller'] ??
                 ($admin->getController() ?: CmsController::class) . '::' . $actionName;
-
-            $this->routeCollection->add(
-                $name,
-                new Route($path, $defaults, $requirements, $options, $host, $schemes, $methods, $condition)
-            );
+        } else {
+            $path = $this->getRoutePath($path);
+            $name = $this->getRouteName($name);
         }
+
+        $this->routeCollection->add(
+            $name,
+            new Route($path, $defaults, $requirements, $options, $host, $schemes, $methods, $condition)
+        );
 
         return $this;
     }
@@ -240,23 +222,31 @@ final class Router extends Loader implements RouterInterface
     {
         $this->routeCollection = new RouteCollection();
 
-        foreach ($this->routes as $name => $route) {
-            list ($controller, $action) = $route['controller'];
+        $routes = [
+            'index'     => ['/',          'index'],
+            'dashboard' => ['/dashboard', 'dashboard'],
+            'login'     => ['/login',     'login',  SecurityController::class],
+            'logout'    => ['/logout',    'logout', SecurityController::class],
+        ];
 
-            $name     = $this->routePrefix . '_' . $name;
-            $path     = '/' . $this->routePrefix . rtrim($route['path'], '/');
-            $defaults = ['_controller' => $controller . '::' . $action];
+        foreach ($routes as $name => $route) {
+            list ($path, $action) = $route;
 
-            $this->routeCollection->add($name, new Route($path, $defaults));
+            $defaults = [
+                '_controller' => ($route[2] ?? CmsController::class) . '::' . $action,
+                '_action'     => $action,
+            ];
+
+            $this->add($name, $path, $defaults);
         }
 
         $routes = [
-            'list'      => ['list', []],
-            'create'    => ['create', []],
-            'edit'      => ['{id}/edit', ['id' => '\d+']],
-            'update'    => ['{id}/update', ['id' => '\d+']],
+            'list'      => ['list',           []],
+            'create'    => ['create',         []],
+            'edit'      => ['{id}/edit',      ['id' => '\d+']],
+            'update'    => ['{id}/update',    ['id' => '\d+']],
             'translate' => ['{id}/translate', ['id' => '\d+']],
-            'delete'    => ['{id}/delete', ['id' => '\d+']],
+            'delete'    => ['{id}/delete',    ['id' => '\d+']],
         ];
 
         foreach ($this->pool->getServices() as $code => $admin) {

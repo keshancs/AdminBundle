@@ -157,7 +157,7 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
      *
      * @return bool
      */
-    public function isRoute(string $action);
+    public function isAction(string $action);
 
     /**
      * @param string $name

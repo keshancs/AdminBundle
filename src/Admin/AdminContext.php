@@ -65,7 +65,7 @@ class AdminContext
     /**
      * @var bool
      */
-    protected $showPageSidebar = false;
+    private $showPageSidebar = false;
 
     /**
      * @param AdminInterface $admin
@@ -77,7 +77,7 @@ class AdminContext
     {
         $this->admin = $admin;
 
-        if ($admin->isRoute('list')) {
+        if ($admin->isAction('list')) {
             $alias = ($qb = $admin->createQuery())->getRootAliases()[0];
 
             $admin->configureListFields($listMapper = new ListMapper($admin, $qb, $alias));

@@ -15,13 +15,15 @@ admin:
 
     list:
         page:
-            label_id:     ID
-            label_title:  Nosaukums
-            label_locale: Tulkojumi
+            label_page_title: Lapu Saraksts
+            label_id:         ID
+            label_title:      Nosaukums
+            label_locale:     Tulkojumi
 
         menu:
-            label_id:     ID
-            label_name:   Nosaukums
+            label_page_title: Navigāciju Saraksts
+            label_id:         ID
+            label_name:       Nosaukums
 
     form:
         page:

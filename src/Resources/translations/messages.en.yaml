@@ -14,7 +14,16 @@ admin:
             label_filter: Apply filters
 
     list:
-        label_id: ID
+        page:
+            label_page_title: Page List
+            label_id:         ID
+            label_title:      Title
+            label_locale:     Translations
+
+        menu:
+            label_page_title: Menu List
+            label_id:         ID
+            label_name:       Title
 
     form:
         page:

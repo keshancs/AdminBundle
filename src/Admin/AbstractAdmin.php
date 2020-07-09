@@ -394,13 +394,13 @@ abstract class AbstractAdmin implements AdminInterface
     /**
      * @inheritDoc
      */
-    public function isRoute(string $action)
+    public function isAction(string $action)
     {
         if (null === $this->request) {
             return false;
         }
 
-        return $this->request->get('_route') == $this->getRouteName($action);
+        return $this->request->get('_action') == $action;
     }
 
     /**
@@ -462,10 +462,6 @@ abstract class AbstractAdmin implements AdminInterface
     public function configure(Request $request)
     {
         $this->request = $request;
-
-        foreach (['list', 'create', 'edit', 'update', 'translate', 'delete'] as $route) {
-            $this->routes[$route] = $this->getRouteName($route);
-        }
     }
 
     /**
