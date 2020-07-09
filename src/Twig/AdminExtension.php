@@ -33,11 +33,6 @@ final class AdminExtension extends AbstractExtension
     private $requestStack;
 
     /**
-     * @var RouteLoader
-     */
-    private $routeLoader;
-
-    /**
      * @var Pool
      */
     private $pool;
@@ -74,7 +69,6 @@ final class AdminExtension extends AbstractExtension
 
     /**
      * @param RequestStack           $requestStack
-     * @param RouteLoader            $routeLoader
      * @param Pool                   $pool
      * @param ParameterBagInterface  $parameterBag
      * @param Environment            $environment
@@ -84,7 +78,6 @@ final class AdminExtension extends AbstractExtension
      */
     public function __construct(
         RequestStack           $requestStack,
-        RouteLoader            $routeLoader,
         Pool                   $pool,
         ParameterBagInterface  $parameterBag,
         Environment            $environment,
@@ -93,7 +86,6 @@ final class AdminExtension extends AbstractExtension
         SettingManager         $settingManager
     ) {
         $this->requestStack     = $requestStack;
-        $this->routeLoader      = $routeLoader;
         $this->pool             = $pool;
         $this->parameterBag     = $parameterBag;
         $this->environment      = $environment;
@@ -198,9 +190,9 @@ final class AdminExtension extends AbstractExtension
      */
     public function generateCmsPageUrl(array $parameters)
     {
-        /** @var Page|null $page */
-        $page    = null;
         $request = $this->requestStack->getCurrentRequest();
+        /** @var Page|null $page */
+        $page    = $request->get('_page', null);
 
         if (!isset($parameters['id']) && !isset($parameters['locale'])) {
             throw new \RuntimeException('Parameters `id` or `locale` are required to generate a CMS page URL.');
@@ -214,17 +206,13 @@ final class AdminExtension extends AbstractExtension
 
         if (isset($parameters['locale'])) {
             if (null === $page) {
-                if (!$page = $request->get('_page')) {
-                    throw new \RuntimeException(
-                        'In order to generate a URL for page using only `locale` parameter an active page should be present'
-                    );
-                }
-
-                if ($page = $request->get('_page') && $page->getLocale() !== $parameters['locale']) {
-                    $page = $page->getTranslation($parameters['locale']);
-                }
+                throw new \RuntimeException(
+                    'In order to generate a URL for page using only `locale` parameter an active page should be present'
+                );
             } else if ($page->getLocale() !== $parameters['locale']) {
-                $page = $page->getTranslation($parameters['locale']);
+                if ($translation = $page->getTranslation($parameters['locale'])) {
+                    $page = $translation;
+                }
             }
 
             unset($parameters['locale']);

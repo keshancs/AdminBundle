@@ -2,23 +2,37 @@
 
 namespace AdminBundle\Routing;
 
+use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CmsController;
 use AdminBundle\Controller\SecurityController;
 use AdminBundle\Entity\Page;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 
-final class Router implements RouterInterface
+final class Router extends Loader implements RouterInterface
 {
+    /**
+     * @var Pool
+     */
+    private $pool;
+
     /**
      * @var EntityManagerInterface
      */
     private $em;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var UrlGeneratorInterface
@@ -63,22 +77,20 @@ final class Router implements RouterInterface
     ];
 
     /**
-     * @param EntityManagerInterface $em
+     * @var bool
      */
-    public function __construct(EntityManagerInterface $em)
+    private $loaded = false;
+
+    /**
+     * @param Pool                   $pool
+     * @param EntityManagerInterface $em
+     * @param LoggerInterface        $logger
+     */
+    public function __construct(Pool $pool, EntityManagerInterface $em, LoggerInterface $logger)
     {
-        $this->em              = $em;
-        $this->routeCollection = new RouteCollection();
-
-        foreach ($this->routes as $name => $route) {
-            list ($controller, $action) = $route['controller'];
-
-            $name     = $this->routePrefix . '_' . $name;
-            $path     = '/' . $this->routePrefix . rtrim($route['path'], '/');
-            $defaults = ['_controller' => $controller . '::' . $action];
-
-            $this->routeCollection->add($name, new Route($path, $defaults));
-        }
+        $this->pool   = $pool;
+        $this->em     = $em;
+        $this->logger = $logger;
     }
 
     /**
@@ -102,19 +114,11 @@ final class Router implements RouterInterface
      */
     public function getRouteCollection()
     {
-        return $this->routeCollection;
-    }
-
-    /**
-     * @return UrlGenerator|UrlGeneratorInterface
-     */
-    public function getGenerator()
-    {
-        if (null == $this->urlGenerator) {
-            $this->urlGenerator = new UrlGenerator($this->routeCollection, $this->context);
+        if (false === $this->loaded) {
+            $this->routeCollection = $this->loadRouteCollection();
         }
 
-        return $this->urlGenerator;
+        return $this->routeCollection;
     }
 
     /**
@@ -140,5 +144,83 @@ final class Router implements RouterInterface
         }
 
         throw new ResourceNotFoundException();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function load($resource, $type = null)
+    {
+        return $this->getRouteCollection();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function supports($resource, $type = null)
+    {
+        return true;
+    }
+
+    /**
+     * @return UrlGenerator|UrlGeneratorInterface
+     */
+    public function getGenerator()
+    {
+        if (null == $this->urlGenerator) {
+            $this->urlGenerator = new UrlGenerator($this->getRouteCollection(), $this->context, $this->logger);
+        }
+
+        return $this->urlGenerator;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return string
+     */
+    public function getRouteName(string $name)
+    {
+        return $this->routePrefix . '_' . $name;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
+    public function getRoutePath(string $path)
+    {
+        return '/' . $this->routePrefix . rtrim($path, '/');
+    }
+
+    /**
+     * @return RouteCollection
+     */
+    private function loadRouteCollection()
+    {
+        $routeCollection = new RouteCollection();
+
+        foreach ($this->routes as $name => $route) {
+            list ($controller, $action) = $route['controller'];
+
+            $name     = $this->routePrefix . '_' . $name;
+            $path     = '/' . $this->routePrefix . rtrim($route['path'], '/');
+            $defaults = ['_controller' => $controller . '::' . $action];
+
+            $routeCollection->add($name, new Route($path, $defaults));
+        }
+
+        foreach ($this->pool->getServices() as $code => $admin) {
+            $name       = $admin->getRouteName('list');
+            $path       = $admin->getRoutePath('list');
+            $defaults   = ['_controller' => ($admin->getController() ?: CmsController::class) . '::list'];
+
+            $routeCollection->add($name, new Route($path, $defaults));
+        }
+
+        $this->loaded = true;
+
+        return $routeCollection;
     }
 }

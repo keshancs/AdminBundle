@@ -34,7 +34,7 @@ final class AddDependencyCallsCompilerPass implements CompilerPassInterface
 
             $admin->setMethodCalls([
                 ['setPool', [new Reference('admin.pool')]],
-                ['setRouter', [new Reference('router')]],
+                ['setRouter', [new Reference('admin.router')]],
                 ['setFormFactory', [new Reference('form.factory')]],
                 ['setEntityManager', [new Reference('doctrine.orm.entity_manager')]],
                 ['setTranslator', [new Reference('translator')]],

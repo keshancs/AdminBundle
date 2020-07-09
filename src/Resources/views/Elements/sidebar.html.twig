@@ -18,9 +18,9 @@
             <ul class="nav flex-column">
                 {%- for code, item in pool.config.menu.items -%}
                     {%- set item_admin = pool.getAdminByAdminCode(code) -%}
-                    {%- set active     = route in item_admin.routes|map((key, value) => value) -%}
+                    {%- set active     = false -%}
                     <li class="nav-item">
-                        <a href="{{ admin_path('list', code) }}" class="nav-link{% if active %} active{% endif %}">
+                        <a href="{{ item.url|default(item_admin.generateUrl('list')) }}" class="nav-link{% if active %} active{% endif %}">
                             {% if item.icon %}<span data-feather="{{ item.icon }}"></span>{% endif %}
                             {{ item.label|trans }}
                         </a>

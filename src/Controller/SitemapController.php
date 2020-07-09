@@ -18,18 +18,11 @@ class SitemapController extends AbstractController
     private $router;
 
     /**
-     * @var RouteLoader
-     */
-    private $routeLoader;
-
-    /**
      * @param RouterInterface $router
-     * @param RouteLoader     $routeLoader
      */
-    public function __construct(RouterInterface $router, RouteLoader $routeLoader)
+    public function __construct(RouterInterface $router)
     {
-        $this->router      = $router;
-        $this->routeLoader = $routeLoader;
+        $this->router = $router;
     }
 
     /**
@@ -40,46 +33,46 @@ class SitemapController extends AbstractController
     public function index(Request $request)
     {
         $urls        = [];
-        $hostname    = $request->getSchemeAndHttpHost();
-        $routes      = clone $this->router->getRouteCollection();
-        $routePrefix = $this->routeLoader->getRoutePrefix();
-
-        $routes->remove($routePrefix . '_sitemap');
-        $routes->remove($routePrefix . '_robots');
-
-        foreach ($this->get('admin.pool')->getServices() as $code => $admin) {
-            foreach ($admin->getRoutes() as $name => $route) {
-                $routes->remove($route);
-            }
-
-            foreach ($this->routeLoader->getRoutes() as $route => $config) {
-                if ($config['crud']) {
-                    continue;
-                }
-
-                $routes->remove($routePrefix . '_' . $route);
-            }
-        }
-
-        /** @var EntityManagerInterface $em */
-        $em             = $this->getDoctrine()->getManager();
-        $qb             = $em->getRepository(Page::class)->createQueryBuilder('p')->select('p.id');
-        $pageIds        = array_column($qb->getQuery()->getResult(), 'id');
-        $adminExtension = $this->get('admin.twig.admin_extension');
-
-        foreach ($pageIds as $pageId) {
-            $url = $adminExtension->generateCmsPageUrl(['id' => $pageId]);
-
-            $urls[] = ['loc' => $url];
-        }
-
-        foreach ($routes as $name => $route) {
-            if (false === strpos($name, '_')) {
-                $url = $this->router->generate($name);
-
-                $urls[] = ['loc' => $url];
-            }
-        }
+//        $hostname    = $request->getSchemeAndHttpHost();
+//        $routes      = clone $this->router->getRouteCollection();
+//        $routePrefix = $this->router->getRoutePrefix();
+//
+//        $routes->remove($routePrefix . '_sitemap');
+//        $routes->remove($routePrefix . '_robots');
+//
+//        foreach ($this->get('admin.pool')->getServices() as $code => $admin) {
+//            foreach ($admin->getRoutes() as $name => $route) {
+//                $routes->remove($route);
+//            }
+//
+//            foreach ($this->routeLoader->getRoutes() as $route => $config) {
+//                if ($config['crud']) {
+//                    continue;
+//                }
+//
+//                $routes->remove($routePrefix . '_' . $route);
+//            }
+//        }
+//
+//        /** @var EntityManagerInterface $em */
+//        $em             = $this->getDoctrine()->getManager();
+//        $qb             = $em->getRepository(Page::class)->createQueryBuilder('p')->select('p.id');
+//        $pageIds        = array_column($qb->getQuery()->getResult(), 'id');
+//        $adminExtension = $this->get('admin.twig.admin_extension');
+//
+//        foreach ($pageIds as $pageId) {
+//            $url = $adminExtension->generateCmsPageUrl(['id' => $pageId]);
+//
+//            $urls[] = ['loc' => $url];
+//        }
+//
+//        foreach ($routes as $name => $route) {
+//            if (false === strpos($name, '_')) {
+//                $url = $this->router->generate($name);
+//
+//                $urls[] = ['loc' => $url];
+//            }
+//        }
 
         $body = $this->renderView('@Admin/Sitemap/sitemap.html.twig', ['urls' => $urls, 'hostname' => $hostname]);
 

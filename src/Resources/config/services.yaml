@@ -5,7 +5,6 @@ services:
             - { name: controller.service_arguments }
         bind:
             $router:         '@router'
-            $routeLoader:    '@admin.route_loader'
             $packageManager: '@assets.packages'
 
     admin.security.login_form_authenticator:
@@ -21,20 +20,16 @@ services:
         public: true
         class: AdminBundle\Admin\Pool
 
-    admin.route_loader:
-        public: true
-        class: AdminBundle\Routing\RouteLoader
-        arguments:
-            - "@admin.pool"
-            - "@admin.router"
-        tags:
-            - { name: routing.loader }
-
     admin.router:
         public: true
         class: AdminBundle\Routing\Router
         arguments:
+            - "@admin.pool"
             - "@doctrine.orm.entity_manager"
+            - "@logger"
+        tags:
+            - { name: routing.loader }
+            - { name: monolog.logger }
 
     admin.service_listener:
         class: AdminBundle\EventListener\AdminServiceListener
@@ -48,7 +43,6 @@ services:
         class: AdminBundle\Twig\AdminExtension
         arguments:
             - "@request_stack"
-            - "@admin.route_loader"
             - "@admin.pool"
             - "@parameter_bag"
             - "@twig"

@@ -271,7 +271,7 @@ abstract class AbstractAdmin implements AdminInterface
      */
     public function getRoutePath(string $path)
     {
-        return $this->router->getRoutePath($this->name . '/' . $path);
+        return $this->router->getRoutePath('/' . $this->name . '/' . $path);
     }
 
     /**
@@ -439,11 +439,7 @@ abstract class AbstractAdmin implements AdminInterface
      */
     public function generateUrl($name, array $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
-        return $this->router->generate(
-            $this->router->getRouteName($this->getRouteName($name)),
-            $parameters,
-            $referenceType
-        );
+        return $this->router->generate($this->getRouteName($name), $parameters, $referenceType);
     }
 
     /**
