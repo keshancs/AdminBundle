@@ -14,6 +14,12 @@ admin:
             label_filter: Pielietot filtrus
 
     list:
+        user:
+            label_page_title: Lietotāju Saraksts
+            label_id:         ID
+            label_username:   Lietotājvārds
+            label_roles:      Tiesības
+
         page:
             label_page_title: Lapu Saraksts
             label_id:         ID

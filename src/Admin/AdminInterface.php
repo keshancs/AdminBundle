@@ -13,6 +13,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
 {
@@ -94,19 +95,10 @@ interface AdminInterface extends TemplateRegistryInterface, TranslatorInterface
     public function newInstance();
 
     /**
-     * @return string
+     * @param Environment $environment
+     * @param Request     $request
      */
-//    public function getFormTheme();
-
-    /**
-     * @param string $formTheme
-     */
-//    public function setFormTheme(string $formTheme);
-
-    /**
-     * @param Request $request
-     */
-    public function configure(Request $request);
+    public function configure(Environment $environment, Request $request);
 
     /**
      * @param ListMapper $listMapper

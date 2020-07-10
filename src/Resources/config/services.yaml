@@ -34,6 +34,7 @@ services:
     admin.service_listener:
         class: AdminBundle\EventListener\AdminServiceListener
         arguments:
+            - "@twig"
             - "@admin.pool"
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
@@ -71,6 +72,15 @@ services:
         arguments:
             - "@doctrine.orm.entity_manager"
 
+    admin.user:
+        public: true
+        class: AdminBundle\Admin\UserAdmin
+        arguments:
+            - admin.user
+            - AdminBundle\Entity\User
+        tags:
+            - { name: admin }
+
     admin.page:
         public: true
         class: AdminBundle\Admin\PageAdmin
@@ -80,6 +90,7 @@ services:
         tags:
             - { name: admin }
         calls:
+            - [setTemplate, ["list_widgets", "@@Admin/CRUD/page_edit.html.twig"]]
             - [setTemplate, ["edit", "@@Admin/CRUD/page_edit.html.twig"]]
             - [setFormTheme, ["@@Admin/CRUD/page_fields.html.twig"]]
 

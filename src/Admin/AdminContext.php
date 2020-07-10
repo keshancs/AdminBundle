@@ -14,6 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\Request;
+use Twig\Environment;
 
 class AdminContext
 {
@@ -75,28 +77,7 @@ class AdminContext
      */
     public function __construct(AdminInterface $admin)
     {
-        $this->admin = $admin;
-
-        if ($admin->isAction('list')) {
-            $alias = ($qb = $admin->createQuery())->getRootAliases()[0];
-
-            $admin->configureListFields($listMapper = new ListMapper($admin, $qb, $alias));
-
-            $this->list        = $listMapper->getList();
-            $this->results     = $this->applyTransforms($qb->getQuery()->getResult());
-            $this->resultCount = $qb->select($qb->expr()->count($alias))->getQuery()->getSingleScalarResult();
-
-            if ($this->hasResults()) {
-                $filters      = $admin->getRequest()->get('filter', []);
-                $filterMapper = new FilterMapper($admin, $qb, $alias, $filters);
-
-                $admin->configureFilters($filterMapper);
-
-                $this->filters           = $filters;
-                $this->filterFormBuilder = $filterMapper->getFormBuilder();
-            }
-        }
-
+        $this->admin     = $admin;
         $this->formTabs  = new ArrayCollection();
         $this->formTheme = '@Admin/form_fields.html.twig';
     }
@@ -162,6 +143,36 @@ class AdminContext
     public function setFormTheme(string $formTheme)
     {
         $this->formTheme = $formTheme;
+    }
+
+    /**
+     * @param Environment $environment
+     * @param Request     $request
+     *
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    public function configure(Environment $environment, Request $request)
+    {
+        if ($this->admin->isAction('list')) {
+            $alias = ($qb = $this->admin->createQuery())->getRootAliases()[0];
+
+            $this->admin->configureListFields($listMapper = new ListMapper($environment, $this->admin, $qb, $alias));
+
+            $this->list        = $listMapper->getList();
+            $this->results     = $this->applyTransforms($qb->getQuery()->getResult());
+            $this->resultCount = $qb->select($qb->expr()->count($alias))->getQuery()->getSingleScalarResult();
+
+            if ($this->hasResults()) {
+                $filters      = $request->get('filter', []);
+                $filterMapper = new FilterMapper($this->admin, $qb, $alias, $filters);
+
+                $this->admin->configureFilters($filterMapper);
+
+                $this->filters           = $filters;
+                $this->filterFormBuilder = $filterMapper->getFormBuilder();
+            }
+        }
     }
 
     /**

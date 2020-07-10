@@ -1,0 +1,21 @@
+{% block title %}
+    <span data-toggle="tooltip" title="{{ object.path }}">{{ object.title }}</span>
+{% endblock %}
+
+{% block locale %}
+    {%- for locale in get_admin_setting('front_locales') -%}
+        {% if object.locale != locale %}
+            {%- set flag_path   = 'bundles/admin/img/flags/' ~ locale ~ '.png' -%}
+            {%- set translation = object.translation(locale) %}
+            {% if translation %}
+                <a href="{{ admin.generateUrl('edit', { id: translation.id }) }}">
+                    <img src="{{ asset(flag_path) }}" alt="{{ locale }}" />
+                </a>
+            {% else %}
+                <a href="{{ admin.generateUrl('translate', { id: object.id }) }}">
+                    <img src="{{ asset(flag_path) }}" alt="{{ locale }}" />
+                </a>
+            {% endif %}
+        {% endif %}
+    {%- endfor -%}
+{% endblock %}

@@ -6,20 +6,28 @@ use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Controller\CoreController;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Twig\Environment;
 
 final class AdminServiceListener
 {
     /**
-     * @var Pool
+     * @var Environment $environment
+     */
+    private $environment;
+
+    /**
+     * @var Pool $pool
      */
     private $pool;
 
     /**
-     * @param Pool $pool
+     * @param Environment $environment
+     * @param Pool        $pool
      */
-    public function __construct(Pool $pool)
+    public function __construct(Environment $environment, Pool $pool)
     {
-        $this->pool = $pool;
+        $this->environment = $environment;
+        $this->pool        = $pool;
     }
 
     /**
@@ -32,7 +40,7 @@ final class AdminServiceListener
         if ($adminCode = $request->get('_admin', null)) {
             /** @var AdminInterface $admin */
             $admin = $this->pool->getAdminByAdminCode($adminCode);
-            $admin->configure($request);
+            $admin->configure($this->environment, $request);
 
             /** @var CoreController $controller */
             $controller = $event->getController()[0];

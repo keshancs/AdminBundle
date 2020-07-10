@@ -7,7 +7,7 @@
         <span class="pagetree-node-collapse" data-feather="plus-circle"></span>
         <span class="pagetree-node-collapse d-none" data-feather="minus-circle"></span>
     {%- endif -%}
-    <a href="{{ admin_path('edit', page_admin.code, { id: page.id }) }}" class="pagetree-node-link text-decoration-none{% if active %} pagetree-node-link--active{% endif %}">
+    <a href="{{ page_admin.generateUrl('edit', { id: page.id }) }}" class="pagetree-node-link text-decoration-none{% if active %} pagetree-node-link--active{% endif %}">
         <div class="pagetree-node-icon">
             {%- if page.homePage -%}
                 <span data-feather="globe" style="fill: #fff; color: #999;"></span>

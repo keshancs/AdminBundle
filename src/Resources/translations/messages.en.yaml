@@ -14,6 +14,12 @@ admin:
             label_filter: Apply filters
 
     list:
+        user:
+            label_page_title: User List
+            label_id:         ID
+            label_username:   Username
+            label_roles:      Roles
+
         page:
             label_page_title: Page List
             label_id:         ID

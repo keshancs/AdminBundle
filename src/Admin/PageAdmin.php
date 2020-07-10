@@ -15,15 +15,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints\Regex;
+use Twig\Environment;
 
 class PageAdmin extends AbstractAdmin
 {
     /**
      * @inheritDoc
      */
-    public function configure(Request $request)
+    public function configure(Environment $environment, Request $request)
     {
-        parent::configure($request);
+        parent::configure($environment, $request);
 
         $this->getContext()->setShowPageSidebar(true);
     }
@@ -49,8 +50,14 @@ class PageAdmin extends AbstractAdmin
     {
         $listMapper
             ->add('id')
-            ->add('title', ['widget' => 'page_title'])
-            ->add('locale', ['widget' => 'page_locale'])
+            ->add('title', [
+                'template'   => '@Admin/CRUD/page_list.html.twig',
+                'block_name' => 'title'
+            ])
+            ->add('locale', [
+                'template'   => '@Admin/CRUD/page_list.html.twig',
+                'block_name' => 'locale'
+            ])
         ;
     }
 

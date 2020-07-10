@@ -107,9 +107,6 @@ final class AdminExtension extends AbstractExtension
             new TwigFunction('admin_route', [$this, 'getAdminRoute']),
             new TwigFunction('admin_path', [$this, 'getAdminPath']),
             new TwigFunction('cms_page_url', [$this, 'generateCmsPageUrl']),
-            new TwigFunction('render_list_element', [$this, 'renderListElement'], [
-                'is_safe' => ['html'],
-            ]),
             new TwigFunction('render_menu_element', [$this, 'renderMenuElement'], [
                 'is_safe' => ['html'],
             ]),
@@ -225,29 +222,6 @@ final class AdminExtension extends AbstractExtension
         }
 
         return $url;
-    }
-
-    /**
-     * @param AdminInterface       $admin
-     * @param ListColumnDescriptor $listColumnDescriptor
-     * @param object               $data
-     *
-     * @return string
-     * @throws LoaderError
-     * @throws RuntimeError
-     * @throws SyntaxError
-     */
-    public function renderListElement(AdminInterface $admin, ListColumnDescriptor $listColumnDescriptor, $data)
-    {
-        $options  = $listColumnDescriptor->getOptions();
-        $template = sprintf('@Admin/CRUD/list_%s.html.twig', $options['widget'] ?? 'default');
-
-        return $this->environment->render($template, [
-            'admin'  => $admin,
-            'column' => $listColumnDescriptor,
-            'object' => $data,
-            'value'  => $this->propertyAccessor->getValue($data, $listColumnDescriptor->getPropertyPath()),
-        ]);
     }
 
     /**

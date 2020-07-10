@@ -2,8 +2,6 @@
 
 {% set filters = true %}
 
-{#{% block title %}{{ admin.class }}{% endblock %}#}
-
 {% block header %}<h1>{{ admin.class }}</h1>{% endblock %}
 
 {% block content %}
@@ -19,22 +17,33 @@
                 <thead class="thead-light">
                     <tr>
                         <th>&nbsp;</th>
-                        {% for column in admin.context.list %}
-                            <th>{{ column.label|trans }}</th>
+                        {% for propertyPath, options in admin.context.list %}
+                            <th>{{ options.label|trans }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for index, data in result %}
+                    {% for index, object in result %}
                         <tr>
                             <td>
                                 <label>
-                                    <input type="checkbox" class="i-checks" name="idx[]" value="{{ data.id }}" />
+                                    <input type="checkbox" class="i-checks" name="idx[]" value="{{ object.id }}" />
                                 </label>
                             </td>
-                            {% for column in admin.context.list %}
-                                {{ render_list_element(admin, column, data) }}
-                            {% endfor %}
+                            {%- for propertyPath, options in admin.context.list -%}
+                                {%- set value = attribute(object, propertyPath) -%}
+                                {%- if propertyPath == admin.identifier -%}<th scope="row">{%- else -%}<td>{%- endif -%}
+                                {%- if options.template is defined -%}
+                                    {{- options.template.renderBlock(options.block_name, { admin: admin, object: object, propertyPath: propertyPath, value: value })|raw -}}
+                                {%- else -%}
+                                    {%- if propertyPath == admin.identifier -%}
+                                        <a href="{{ admin_pool().getAdminByAdminCode(admin.code).generateUrl('edit', { id: value }) }}">{{ value }}</a>
+                                    {%- else -%}
+                                        {{- value -}}
+                                    {%- endif -%}
+                                {%- endif -%}
+                                {%- if propertyPath == admin.identifier -%}</th>{%- else -%}</td>{%- endif -%}
+                            {%- endfor -%}
                         </tr>
                     {% endfor %}
                 </tbody>

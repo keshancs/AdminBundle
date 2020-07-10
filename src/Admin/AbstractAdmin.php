@@ -12,6 +12,8 @@ use AdminBundle\Routing\Router;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Exception;
 use ReflectionClass;
@@ -21,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 abstract class AbstractAdmin implements AdminInterface
 {
@@ -459,9 +462,15 @@ abstract class AbstractAdmin implements AdminInterface
     /**
      * @inheritDoc
      */
-    public function configure(Request $request)
+    public function configure(Environment $environment, Request $request)
     {
         $this->request = $request;
+
+        try {
+            $this->getContext()->configure($environment, $request);
+        } catch (NoResultException $e) {
+        } catch (NonUniqueResultException $e) {
+        }
     }
 
     /**
