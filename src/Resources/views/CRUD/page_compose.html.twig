@@ -1,0 +1,12 @@
+{% extends '@Admin/CRUD/layout.html.twig' %}
+
+{% block filters %}{% endblock %}
+
+{% block content %}
+    <div class="container-fluid px-3">
+        <div class="buttons">
+            <a href="{{ admin.generateObjectUrl('edit', object.id) }}" class="btn btn-primary btn-sm">Edit</a>
+            <a href="{{ admin.generateObjectUrl('create_block', object.id) }}" class="btn btn-primary btn-sm">Create Block</a>
+        </div>
+    </div>
+{% endblock %}

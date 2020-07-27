@@ -138,12 +138,12 @@
 }
 
 .tree .pagetree-node:not(.pagetree-node-hovered) > .pagetree-node-link.pagetree-node-link--active {
-    background-color: #007bff;
+    background-color: #e0e4e8;
 }
 
-.tree .pagetree-node:not(.pagetree-node-hovered) > .pagetree-node-link.pagetree-node-link--active .pagetree-node-label {
-    color: #fff;
-}
+/*.tree .pagetree-node:not(.pagetree-node-hovered) > .pagetree-node-link.pagetree-node-link--active .pagetree-node-label {*/
+/*    color: #fff;*/
+/*}*/
 
 .pagetree-toolbar {
     display: flex;

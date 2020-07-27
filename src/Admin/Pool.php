@@ -15,6 +15,11 @@ class Pool
     private $services = [];
 
     /**
+     * @var array
+     */
+    private $blocks = [];
+
+    /**
      * @return array
      */
     public function getConfig()
@@ -54,5 +59,21 @@ class Pool
     public function getAdminByAdminCode(string $code)
     {
         return $this->services[$code] ?? null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBlocks()
+    {
+        return $this->blocks;
+    }
+
+    /**
+     * @param array $blocks
+     */
+    public function setBlocks($blocks)
+    {
+        $this->blocks = $blocks;
     }
 }

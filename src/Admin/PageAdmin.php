@@ -166,6 +166,18 @@ class PageAdmin extends AbstractAdmin
     {
         $router
             ->add(
+                'compose',
+                '{id}/compose',
+                ['_controller' => PageController::class . '::compose'],
+                ['id' => '\d+']
+            )
+            ->add(
+                'create_block',
+                '{id}/block/create',
+                ['_controller' => PageController::class . '::createBlock'],
+                ['id' => '\d+']
+            )
+            ->add(
                 'create_from_tree',
                 'create_from_tree',
                 ['_controller' => PageController::class . '::createFromTree'],

@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="menu")
+ * @ORM\EntityListeners({"AdminBundle\EventListener\MenuListener"})
  */
 class Menu
 {
@@ -35,6 +36,27 @@ class Menu
      * @ORM\OrderBy({"priority" : "ASC"})
      */
     private $items;
+
+    /**
+     * @var array $itemIds
+     *
+     * @ORM\Column(name="item_ids", type="json", nullable=true)
+     */
+    private $itemIds = [];
+
+    /**
+     * @var array $pageIds
+     *
+     * @ORM\Column(name="page_ids", type="json", nullable=true)
+     */
+    private $pageIds = [];
+
+    /**
+     * @var array $hierarchy
+     *
+     * @ORM\Column(name="hierarchy", type="json", nullable=true)
+     */
+    private $hierarchy = [];
 
     public function __construct()
     {
@@ -107,5 +129,65 @@ class Menu
         $this->items->removeElement($item);
 
         $item->setMenu(null);
+    }
+
+    /**
+     * @return array
+     */
+    public function getItemIds()
+    {
+        return $this->itemIds;
+    }
+
+    /**
+     * @param array $itemIds
+     *
+     * @return Menu
+     */
+    public function setItemIds($itemIds)
+    {
+        $this->itemIds = $itemIds;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPageIds()
+    {
+        return $this->pageIds;
+    }
+
+    /**
+     * @param array $pageIds
+     *
+     * @return Menu
+     */
+    public function setPageIds($pageIds)
+    {
+        $this->pageIds = $pageIds;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHierarchy()
+    {
+        return $this->hierarchy;
+    }
+
+    /**
+     * @param array $hierarchy
+     *
+     * @return Menu
+     */
+    public function setHierarchy($hierarchy)
+    {
+        $this->hierarchy = $hierarchy;
+
+        return $this;
     }
 }

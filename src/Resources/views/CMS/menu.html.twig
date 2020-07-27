@@ -9,7 +9,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="navbar-nav mr-auto">
-                {%- for item in items -%}
+                {%- for item_id, item_ids in hierarchy -%}
                     {%- include '@Admin/CMS/menu_item.html.twig' -%}
                 {%- endfor -%}
             </ul>

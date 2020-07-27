@@ -1,6 +1,7 @@
-{%- set level     = level|default(1)  %}
-{%- set has_items = item.items|length > 0 -%}
-{%- set page      = item.page -%}
+{%- set level     = level|default(1) -%}
+{%- set item      = items[item_id] -%}
+{%- set has_items = item_ids|length > 0 -%}
+{%- set page      = pages[item_id] -%}
 {%- set active    = page and (page.id in current_page.hierarchy or page.id == current_page.id) -%}
 
 {%- if page.locale == 'lv' -%}
@@ -15,8 +16,12 @@
 
     {%- if has_items -%}
         <ul class="dropdown-menu" aria-labelledby="dropdown{{ item.id }}">
-            {% for child in item.items %}
-                {%- include '@Admin/CMS/menu_item.html.twig' with { item: child, level: level + 1 } -%}
+            {% for child_id, child_item_ids in item_ids %}
+                {%- include '@Admin/CMS/menu_item.html.twig' with {
+                    item_id:  child_id,
+                    item_ids: child_item_ids,
+                    level:    level + 1
+                } -%}
             {% endfor %}
         </ul>
     {%- endif -%}

@@ -48,7 +48,18 @@ final class AddDependencyCallsCompilerPass implements CompilerPassInterface
             $services[$code] = new Reference($id);
         }
 
+        $blocks = [];
+
+        foreach ($container->findTaggedServiceIds('admin.block') as $id => $data) {
+            $block = $container->getDefinition($id);
+
+            $blocks[$id] = $block->getClass();
+        }
+
         $pool = $container->getDefinition('admin.pool');
-        $pool->addMethodCall('setServices', [$services]);
+        $pool
+            ->addMethodCall('setServices', [$services])
+            ->addMethodCall('setBlocks', [$blocks])
+        ;
     }
 }

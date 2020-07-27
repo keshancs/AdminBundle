@@ -2,22 +2,20 @@
 
 namespace AdminBundle\Twig;
 
-use AdminBundle\Admin\AdminInterface;
 use AdminBundle\Admin\Pool;
 use AdminBundle\Admin\SettingManager;
 use AdminBundle\Entity\Menu;
 use AdminBundle\Entity\MenuItem;
 use AdminBundle\Entity\Page;
-use AdminBundle\Mapper\ListColumnDescriptor;
 use AdminBundle\Routing\RouteLoader;
-use AdminBundle\Routing\Router;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\UnexpectedResultException;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -235,11 +233,49 @@ final class AdminExtension extends AbstractExtension
      */
     public function renderMenuElement($menuId, array $options = [])
     {
-        $items = $this->em->getRepository(MenuItem::class)->findBy(['menu' => $menuId]);
+        $count = 0;
+        $items = $pages = [];
+        /** @var Menu $menu */
+        $menu  = $this->em->getRepository(Menu::class)->findOneBy(['id' => $menuId]);
 
-        if ($items) {
+        if ($menu) {
+            $qb = $this->em->createQueryBuilder();
+            $qb
+                ->select('mi')
+                ->from(MenuItem::class, 'mi', 'mi.id')
+                ->where($qb->expr()->in('mi.id', ':menu_item_ids'))
+                ->setParameter('menu_item_ids', $menu->getItemIds())
+            ;
+
+            $countQuery = (clone $qb)->resetDQLPart('join');
+
+            try {
+                $count = $countQuery->select($qb->expr()->count('mi'))->getQuery()->getSingleScalarResult();
+            } catch (UnexpectedResultException $e) {
+            }
+
+            $items = $qb->getQuery()->getResult();
+
+            $qb = $this->em->createQueryBuilder();
+            $qb
+                ->select('p')
+                ->from(Page::class, 'p', 'p.id')
+                ->where($qb->expr()->in('p.id', ':page_ids'))
+                ->setParameter('page_ids', array_keys($menu->getPageIds()))
+            ;
+
+            $pageIds = $qb->getQuery()->getResult();
+
+            foreach ($menu->getPageIds() as $pageId => $itemId) {
+                $pages[$itemId] = $pageIds[$pageId];
+            }
+        }
+
+        if ($count) {
             return $this->environment->render($options['template'] ?? '@Admin/CMS/menu.html.twig', [
-                'items' => $items,
+                'hierarchy' => $menu->getHierarchy(),
+                'items'     => $items,
+                'pages'     => $pages,
             ]);
         }
 

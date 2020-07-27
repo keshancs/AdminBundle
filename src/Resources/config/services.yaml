@@ -94,6 +94,15 @@ services:
             - [setTemplate, ["edit", "@@Admin/CRUD/page_edit.html.twig"]]
             - [setFormTheme, ["@@Admin/CRUD/page_fields.html.twig"]]
 
+    admin.block:
+        public: true
+        class: AdminBundle\Admin\BlockAdmin
+        arguments:
+            - admin.block
+            - AdminBundle\Entity\Block
+        tags:
+            - { name: admin }
+
     admin.menu:
         public: true
         class: AdminBundle\Admin\MenuAdmin
@@ -114,11 +123,31 @@ services:
         tags:
             - { name: admin }
 
+    admin.block.type:
+        public: true
+        class: AdminBundle\Block\BlockType
+        arguments:
+            - "@admin.pool"
+            - "@twig"
+
+    admin.block.text:
+        public: true
+        class: AdminBundle\Block\TextBlockType
+        tags:
+            - { name: admin.block }
+
     admin.page_listener:
         public: true
         class: AdminBundle\EventListener\PageListener
         arguments:
             - "%kernel.default_locale%"
+        tags:
+            - { name: doctrine.orm.entity_listener, event: prePersist }
+            - { name: doctrine.orm.entity_listener, event: preUpdate }
+
+    admin.menu_listener:
+        public: true
+        class: AdminBundle\EventListener\MenuListener
         tags:
             - { name: doctrine.orm.entity_listener, event: prePersist }
             - { name: doctrine.orm.entity_listener, event: preUpdate }

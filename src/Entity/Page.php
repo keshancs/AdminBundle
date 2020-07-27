@@ -137,11 +137,20 @@ class Page
      */
     private $hierarchy;
 
+    /**
+     * @var ArrayCollection $blocks
+     *
+     * @ORM\OneToMany(targetEntity="AdminBundle\Entity\Block", mappedBy="page")
+     * @ORM\JoinColumn(referencedColumnName="block_id")
+     */
+    private $blocks;
+
     public function __construct()
     {
         $this->isManualSlug = false;
         $this->children     = new ArrayCollection();
         $this->translations = new ArrayCollection();
+        $this->blocks       = new ArrayCollection();
         $this->hierarchy    = [];
     }
 
